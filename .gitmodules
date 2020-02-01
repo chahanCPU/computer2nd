@@ -1,0 +1,3 @@
+[submodule "src/FPU"]
+	path = src/FPU
+	url = git@github.com:chahanCPU/FPU.git
