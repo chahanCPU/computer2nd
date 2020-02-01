@@ -5,26 +5,21 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	input wire rstn,
 	input wire [31:0] pc,
 	input wire [31:0] inst,
-	input wire [1:0] regwritein,
+	input wire [1:0] rwin,
 	input wire [31:0] dtowrite,
-	input wire [4:0] regdstin,
+	input wire [4:0] rdin,
 	output wire [5:0] instr,
-	output wire [1:0] is_sorf,
+	output wire [1:0] op_type,
 	output wire [31:0] s,
 	output wire [31:0] t,
 	output wire [31:0] imm,
-	output wire [4:0] h,
 	output wire branch,
 	output wire jump,
-	output wire rea, //read enable
-	output wire wea, //write enable
-	output wire memtoreg,
-	output wire [1:0] regwrite,
-	output wire is_jal,
+	output wire [1:0] rw,
 	output wire is_jr,
-	output wire out,
+	output wire is_out,
 	output wire stop,
-	output wire [4:0] regdst,
+	output wire [4:0] rd,
 	output wire is_in);
 
 
@@ -80,7 +75,6 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	localparam FPU_FTOI = 6'b001000;
 	localparam FPU_ITOF = 6'b001001;
 
-	wire [31:0] addra32;
 	reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
 	reg [31:0][31:0] fpr = {32{32'b0}};
 
@@ -88,11 +82,11 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 					: inst[31:26] == OP_FPU ? inst[5:0]
 					: inst[31:26];
 
-	assign is_sorf = inst[31:26] == OP_SPECIAL ? 2'b01 
+	assign op_type = inst[31:26] == OP_SPECIAL ? 2'b01 
 					: inst[31:26] == OP_FPU ? 2'b10
 					: 2'b00;
 
-	assign s = is_jal ? pc + 4 : inst[31:26] == OP_FPU 
+	assign s = (inst[31:26] == OP_JAL) ? pc + 4 : inst[31:26] == OP_FPU 
 			? (inst[5:0] == FPU_ITOF ? gpr[inst[15:11]] : fpr[inst[15:11]])
 			: gpr[inst[25:21]];
 
@@ -107,18 +101,14 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 				: inst[31:26] == OP_BLEZ ? {16'b0, inst[15:0]}
 				: inst[31:26] == OP_BNE ? {16'b0, inst[15:0]}
 				: {{16{inst[15]}}, inst[15:0]};
-	assign h = inst[10:6];
 
 	assign branch = (inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ ||
 				inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE);
 
 	assign jump = (inst[31:26] == OP_J || inst[31:26] == OP_JAL);
 
-	assign rea = (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S);
-	assign wea = (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S);
 
-	assign memtoreg = (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S);
-	assign regwrite = (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S
+	assign rw = (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S
 						|| inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
 						|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE
 						|| inst[31:26] == OP_OUT || inst[31:26] == OP_J
@@ -128,14 +118,13 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 					: (inst[31:26] == OP_FPU || inst[31:26] == OP_LW_S) ? 2'b10
 					: 2'b01;
 
-	assign is_jal = (inst[31:26] == OP_JAL);
 	assign is_jr  = (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_JR);
 
-	assign out = (inst[31:26] == OP_OUT);
+	assign is_out = (inst[31:26] == OP_OUT);
 	assign stop = (inst[31:26] == OP_SPECIAL && inst[5:0] == OP_NOOP);
 
 
-	assign regdst = (inst[31:26] == OP_ADDI || inst[31:26] == OP_ANDI || 
+	assign rd = (inst[31:26] == OP_ADDI || inst[31:26] == OP_ANDI || 
 				inst[31:26] == OP_LUI || inst[31:26] == OP_LW || inst[31:26] == OP_LW_S
 				|| inst[31:26] == OP_SLTI || inst[31:26] == OP_XORI || inst[31:26] == OP_ORI) ?
 					inst[20:16]
@@ -146,11 +135,11 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	assign is_in = inst[31:26] == OP_IN;
 	
 	always @(posedge clk) begin
-		if(regwritein == 2'b01) begin
-			gpr[regdstin] <= dtowrite;
+		if(rwin == 2'b01) begin
+			gpr[rdin] <= dtowrite;
 		end
-		else if (regwritein == 2'b10) begin
-			fpr[regdstin] <= dtowrite;
+		else if (rwin == 2'b10) begin
+			fpr[rdin] <= dtowrite;
 		end
 	end
 endmodule

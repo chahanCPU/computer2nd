@@ -3,51 +3,50 @@
 module writereg #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, parameter BRAM_SIZE = 18)
 	(input wire clk,
 	input wire rstn,
-	input wire out,
+	input wire is_out,
 	input wire memtoreg,
 	input wire [31:0] douta,
 	input wire [31:0] d,
-	input wire [4:0] regdst,
+	input wire [4:0] rd,
 	output wire txd,
 	output wire [31:0] dtowrite);
 
-	parameter BUFFER_SIZE = 12;
-	logic [8:0] buffer[BUFFER_SIZE**2-1:0];
+	parameter TX_SIZE = 12;
+	logic [8:0] txbuffer[TX_SIZE**2-1:0];
 
-	logic [BUFFER_SIZE-1:0] bot;
-	logic [BUFFER_SIZE-1:0] top;
-	logic [1:0] latancy;
+	logic [TX_SIZE-1:0] txbot;
+	logic [TX_SIZE-1:0] txtop;
+	logic txwait;
 
 	reg 				 tx_start;
-	wire 			 rx_ready;
 	wire 			 tx_busy;
 
 
-   uart_tx #(CLK_PER_HALF_BIT) u1(buffer[bot], tx_start, tx_busy, txd, clk, rstn);
+   // uart_tx #(CLK_PER_HALF_BIT) tx(txbuffer[txbot], tx_start, tx_busy, txd, clk, rstn);
 
-	assign dtowrite = memtoreg ? douta : d;
+	assign dtowrite = d;
 
 	always @(posedge clk) begin
 		if(~rstn) begin
-			bot <= 0;
-			top <= 0;
-			latancy <= 0;
+			txbot <= 0;
+			txtop <= 0;
+			txwait <= 0;
 		end
 		else begin
-			if (out) begin
-				buffer[top] <= dtowrite[7:0];
-				top <= top + 1;
-			end
+			// if (is_out) begin
+			// 	txbuffer[txtop] <= dtowrite[7:0];
+			// 	txtop <= txtop + 1;
+			// end
 
-			if(latancy == 1) begin
+			if(txwait == 1) begin
 				tx_start <= 0;
-				bot <= bot + 1;
-				latancy <= 0;
+				txbot <= txbot + 1;
+				txwait <= 0;
 			end
 			else begin
-				if (~tx_busy && top != bot) begin
+				if (~tx_busy && txtop != txbot) begin
 					tx_start <= 1;
-					latancy <= latancy + 1;
+					txwait <= 1;
 				end
 			end
 		end

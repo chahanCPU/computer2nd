@@ -1,8 +1,7 @@
 `timescale 1ns / 1ps
 
 module fetch #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10)
-	(input wire rxd,
-	input wire clk,
+	(input wire clk,
 	input wire mode,
 	input wire [31:0] pc,
 	input wire rstn,

@@ -8,7 +8,7 @@ xvlog --sv decode.sv
 xvlog --sv ALU.sv
 xvlog --sv execute.sv
 xvlog --sv writereg.sv
-xvlog --sv topneo.sv
+xvlog --sv top.sv
 # xvlog --sv uart_tx.sv
 # xvlog --sv top.sv
 xvlog --sv test_cpu.sv
