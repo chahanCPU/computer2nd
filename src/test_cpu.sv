@@ -53,10 +53,10 @@ module test_cpu
 	   if (rx_ready) begin
 		    if (is_eof == 0) begin
 				if (filechar != rxchar) begin
-					$display("%d: Not the same!!! ans:%h, real:%h", outcount, filechar, rxchar);
+					$display("%d: Not the same!!! ans:%h, recieved:%h", outcount, filechar, rxchar);
 				end
 				else begin
-					$display("%d: Correct!!! ans:%h, real:%h", outcount, filechar, rxchar);
+					$display("%d: Correct!!! ans:%h, recieved:%h", outcount, filechar, rxchar);
 				end
 
 				ok = $fscanf(gd, "%c", nexchar);
@@ -69,7 +69,7 @@ module test_cpu
 				filechar <= nexchar;
 			end 
 			else begin
-				$display("TOO MANY OUTPUT!! real:%h", rxchar);
+				$display("TOO MANY OUTPUT!! recieved:%h", rxchar);
 			end
 	   end
    end
@@ -94,8 +94,8 @@ module test_cpu
 
    initial begin
 	   // fd=$fopen("/home/omochan/3A/cpujikken/core/code/sandbox/sandbox.s.bintext","r");
-	   sld=$fopen("/home/omochan/3A/cpujikken/core/code/minrt/ball.sld.in","r");
-	   gd=$fopen("/home/omochan/3A/cpujikken/core/code/minrt/minrt.s.ppm","r");
+	   sld=$fopen("/home/omochan/3A/cpujikken/core2/code/minrt/ball.sld.in","r");
+	   gd=$fopen("/home/omochan/3A/cpujikken/core2/code/minrt/minrt.s.ppm","r");
       $dumpfile("test_cpu.vcd");
       $dumpvars(0);
 

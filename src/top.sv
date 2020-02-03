@@ -26,7 +26,12 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	localparam LOAD = 1;
 	localparam EXEC = 2;
 
+	logic [31:0] pc;
 	logic [31:0] f_inst;
+
+	logic [1:0] fd_update;
+
+	logic [31:0] fd_pc;
 	logic [31:0] fd_inst;
 
 
@@ -39,10 +44,10 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic d_jump;
 	logic [1:0] d_rw;
 	logic d_is_jr;
-	logic d_is_out;
 	logic d_stop;
-	logic d_is_in;
 	logic [4:0] d_rd;
+
+	logic [1:0] de_update;
 
 	logic [5:0] de_instr;
 	logic [1:0] de_op_type;
@@ -53,28 +58,26 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic de_jump;
 	logic [1:0] de_rw;
 	logic de_is_jr;
-	logic de_is_out;
 	logic de_stop;
 	logic [4:0] de_rd;
+	logic [31:0] de_pc;
+
 
 	logic [31:0] e_d;
 	logic [31:0] e_npc;
-	logic e_in_valid;
+	logic e_start;
+	logic e_uart_state;
 
-	logic [31:0] ew_d;
 	logic [31:0] ew_npc;
 
-	logic wd_is_out;
-	logic [31:0] w_dtowrite;
-	logic [31:0] wd_dtowrite;
-	logic [31:0] wd_rdin;
-	logic [1:0] wd_rwin;
+	logic [31:0] ew_d;
+	logic [4:0] ew_rd;
+	logic [1:0] ew_rw;
+	logic [1:0] ew_update;
 
-	logic wd_is_in;
 
-	logic [1:0] mode;
+	logic [2:0] mode;
 	logic [7:0] pipe;
-	logic [31 : 0] pc;
 	logic [31:0] inst;
 	assign led = pc[7:0] | (mode << 4);
 
@@ -88,6 +91,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	wire 			 ferr;
 	uart_rx #(CLK_PER_HALF_BIT) u2(rdata, rx_ready, ferr, rxd, clk, rstn);
 
+	wire aa_recieved;
+	wire aa_sent;
+
 	fetch #(CLK_PER_HALF_BIT, INST_SIZE) _fetch(
 		.clk(clk), 
 		.mode(mode), 
@@ -97,14 +103,29 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.done(load_done)
 	);
 
+	// assign fd_update = !(mode == EXEC && pipe == FETCH && latancy == 0);
+	
+	assign fd_update = (mode == EXEC && pipe == FETCH && latancy == 0) ? 2'b01
+		: 2'b00;
+
+	fdreg _fdreg(
+		.clk(clk),
+		.rstn(rstn),
+		.update(fd_update),
+		.f_pc(pc),
+		.f_inst(f_inst),
+		.fd_pc(fd_pc),
+		.fd_inst(fd_inst)
+	);
+
 	decode #(CLK_PER_HALF_BIT, INST_SIZE, BRAM_SIZE) _decode(
 		.clk(clk), 
 		.rstn(rstn), 
-		.pc(pc), 
+		.pc(fd_pc), 
 		.inst(fd_inst), 
-		.rwin(wd_rwin), 
-		.dtowrite(wd_dtowrite), 
-		.rdin(wd_rdin), 
+		.rwin(ew_rw), 
+		.dtowrite(ew_d), 
+		.rdin(ew_rd), 
 		.instr(d_instr),
 		.op_type(d_op_type), 
 		.s(d_s), 
@@ -114,10 +135,41 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.jump(d_jump), 
 		.rw(d_rw), 
 		.is_jr(d_is_jr), 
-		.is_out(d_is_out), 
 		.stop(d_stop),
-		.rd(d_rd), 
-		.is_in(d_is_in)
+		.rd(d_rd)
+	);
+
+	assign de_update = (mode == EXEC && pipe == DECODE && latancy == 0) ? 2'b01
+		: 2'b00;
+
+	dereg _dereg(
+		.clk(clk),
+		.rstn(rstn),
+		.update(de_update),
+		.d_instr(d_instr),
+		.d_op_type(d_op_type),
+		.d_s(d_s),
+		.d_t(d_t),
+		.d_imm(d_imm),
+		.d_branch(d_branch),
+		.d_jump(d_jump),
+		.d_rw(d_rw),
+		.d_is_jr(d_is_jr),
+		.d_stop(d_stop),
+		.d_rd(d_rd),
+		.d_pc(fd_pc),
+		.de_instr(de_instr),
+		.de_op_type(de_op_type),
+		.de_s(de_s),
+		.de_t(de_t),
+		.de_imm(de_imm),
+		.de_branch(de_branch),
+		.de_jump(de_jump),
+		.de_rw(de_rw),
+		.de_is_jr(de_is_jr),
+		.de_stop(de_stop),
+		.de_rd(de_rd),
+		.de_pc(de_pc)
 	);
 
 
@@ -126,7 +178,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.rstn(rstn),
 		.rxd(rxd), 
 		.txd(txd),
-		.pc(pc), 
+		.pc(de_pc), 
 		.instr(de_instr),
 		.op_type(de_op_type), 
 		.s(de_s), 
@@ -135,20 +187,28 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.branch(de_branch), 
 		.jump(de_jump),
 		.is_jr(de_is_jr), 
-		.is_in(wd_is_in), 
-		.latancy(latancy), 
+		.mode(mode),
+		.start(e_start), 
 		.d(e_d), 
-		.npc(e_npc), 
-		.in_valid(e_in_valid)
+		.npc(e_npc),
+		.uart_state(e_uart_state),
+		.aa_recieved(aa_recieved),
+		.aa_sent(aa_sent)
 	);
 
-	writereg #(CLK_PER_HALF_BIT, INST_SIZE, BRAM_SIZE) _writereg(
-		.clk(clk), 
-		.rstn(rstn), 
-		.is_out(wd_is_out), 
-		.d(ew_d), 
-		.rd(de_rd), 
-		.dtowrite(w_dtowrite)
+	assign ew_update = (mode == EXEC && pipe == WRITEREG && latancy == 0) ? 2'b01
+		: 2'b10;
+
+	ewreg _ewreg(
+		.clk(clk),
+		.rstn(rstn),
+		.update(ew_update),
+		.e_d(e_d),
+		.e_rw(de_rw),
+		.e_rd(de_rd),
+		.ew_d(ew_d),
+		.ew_rw(ew_rw),
+		.ew_rd(ew_rd)
 	);
 
    always @(posedge clk) begin
@@ -158,24 +218,22 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		 mode <= STALL;
 		 pipe <= FETCH;
 		 stage <= 0;
+		 e_start <= 0;
 	end 
 	else begin
 		if (mode == STALL) begin
-			if (rx_ready && rdata == 8'b10101010) begin
+			if (aa_recieved) begin
 				mode <= LOAD;
 			end
 		end
 		else if (mode == LOAD) begin
-			if(load_done) begin
+			if(load_done && aa_sent) begin
 				mode <= EXEC;
 			end
 		end
 		else begin
 			if(pipe == FETCH) begin
 				if(latancy == 0) begin
-					fd_inst <= f_inst;
-
-
 					latancy <= 0;
 					pipe <= DECODE;
 				end
@@ -183,31 +241,19 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 			end
 			else if(pipe == DECODE) begin
 				if(latancy == 0) begin
-					de_instr <= d_instr;
-					de_op_type <= d_op_type;
-					de_s <= d_s;
-					de_t <= d_t;
-					de_imm <= d_imm;
-					de_branch <= d_branch;
-					de_jump <= d_jump;
-					de_rw <= d_rw;
-					de_is_jr <= d_is_jr;
-					de_is_out <= d_is_out;
-					de_stop <= d_stop;
-					de_rd <= d_rd;
-
-
 					latancy <= 0;
+					e_start <= 1;
 					pipe <= EXECUTE;
 				end
 				else latancy <= latancy + 1;
 			end
 			else if(pipe == EXECUTE) begin
+				if(latancy == 0) begin
+					e_start <= 0;
+				end
 				if(latancy == 5) begin
-					if(e_in_valid) begin
-						ew_d <= e_d;
+					if(e_uart_state == 0) begin
 						pc <= e_npc;
-
 
 						latancy <= 0;
 						pipe <= WRITEREG;
@@ -217,17 +263,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 			end
 			else if(pipe == WRITEREG) begin
 				if(latancy == 0) begin
-					wd_is_out <= de_is_out;
-					wd_is_in <= d_is_in;
-					wd_dtowrite <= w_dtowrite;
-					wd_rwin <= de_rw;
-					wd_rdin <= de_rd;
 					latancy <= latancy + 1;
 				end
 				else if (latancy == 1) begin
-					wd_rwin <= 2'b0;
-					wd_is_out <= 0;
-					wd_is_in <= 0;
 					latancy <= 0;
 					if(de_stop) pipe <= STOP;
 					else pipe <= FETCH;

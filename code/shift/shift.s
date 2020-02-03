@@ -57,7 +57,7 @@ print_int_label2:
 	div	$4, $4, $5		# divu?
 	div	$3, $2, $4		# divu?
 	addi	$5, $3, 48
-	out	$5
+	!out	$5
 	slti	$at, $4, 2
 	bgtz	$at, print_int_label3
 	mult	$3, $3, $4		# multu?

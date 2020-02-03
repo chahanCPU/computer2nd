@@ -1,8 +1,8 @@
 min_caml_start:
-	!ori	$2, $zero, 7
+	ori	$2, $zero, 10
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	add.176
+	jal	add.177
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	sw	$ra, 4($sp)
@@ -11,18 +11,17 @@ min_caml_start:
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	noop
-add.176:
+add.177:
 	slti	$at, $2, 3
-	blez	$at, bgtz_else.327
-	ori	$2, $zero, 1
-	jr	$ra
-bgtz_else.327:
+	blez	$at, bgtz_else.329
+	j	min_caml_read_int
+bgtz_else.329:
 	addi	$3, $2, -1
 	sw	$2, 0($sp)
 	or	$2, $zero, $3
 	sw	$ra, 4($sp)
 	addi	$sp, $sp, 8
-	jal	add.176
+	jal	add.177
 	addi	$sp, $sp, -8
 	lw	$ra, 4($sp)
 	lw	$3, 0($sp)
@@ -31,7 +30,7 @@ bgtz_else.327:
 	or	$2, $zero, $3
 	sw	$ra, 12($sp)
 	addi	$sp, $sp, 16
-	jal	add.176
+	jal	add.177
 	addi	$sp, $sp, -16
 	lw	$ra, 12($sp)
 	lw	$3, 4($sp)
@@ -89,7 +88,7 @@ min_caml_print_byte:
 # min_caml_prerr_float:		# 未実装
 min_caml_read_int:
 	# ori	$at, $at, 0    # inは上位24ビットをゼロ埋め
-	in	$2
+	!in	$2
 	sll	$2, $2, 8
 	in	$at
 	or	$2, $2, $at

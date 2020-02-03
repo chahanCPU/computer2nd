@@ -7,7 +7,9 @@ LetRec
 			LE
 				Var n
 				Int 2
-			Int 1
+			App
+				Var read_int
+				Unit
 			Add
 				Add
 					App
@@ -27,7 +29,7 @@ LetRec
 		Var print_int
 		App
 			Var add
-			Int 7
+			Int 10
 
 
 <****** CatLib ******>
@@ -482,7 +484,9 @@ LetRec
 																				LE
 																					Var n
 																					Int 2
-																				Int 1
+																				App
+																					Var read_int
+																					Unit
 																				Add
 																					Add
 																						App
@@ -502,7 +506,7 @@ LetRec
 																			Var print_int
 																			App
 																				Var add
-																				Int 7
+																				Int 10
 
 
 <****** Typing ******>
@@ -957,7 +961,9 @@ LetRec
 																				LE
 																					Var n
 																					Int 2
-																				Int 1
+																				App
+																					Var read_int
+																					Unit
 																				Add
 																					Add
 																						App
@@ -977,7 +983,7 @@ LetRec
 																			Var print_int
 																			App
 																				Var add
-																				Int 7
+																				Int 10
 
 
 <****** KNormal ******>
@@ -987,12 +993,12 @@ LetRec
 		x : float
 		y : float
 		Let
-			Td138 : float
+			Td139 : float
 			Let
-				Td137 : float
+				Td138 : float
 				Float 0.000000
-				FAdd x Td137
-			IfEq Td138 y
+				FAdd x Td138
+			IfEq Td139 y
 				Int 1
 				Int 0
 	LetRec
@@ -1001,12 +1007,12 @@ LetRec
 			x : float
 			y : float
 			Let
-				Td136 : float
+				Td137 : float
 				Let
-					Td135 : float
+					Td136 : float
 					Float 0.000000
-					FAdd x Td135
-				IfLE y Td136
+					FAdd x Td136
+				IfLE y Td137
 					Int 0
 					Int 1
 		LetRec
@@ -1014,9 +1020,9 @@ LetRec
 				fispos : (float -> bool)
 				x : float
 				Let
-					Td134 : float
+					Td135 : float
 					Float 0.000000
-					IfLE x Td134
+					IfLE x Td135
 						Int 0
 						Int 1
 			LetRec
@@ -1024,9 +1030,9 @@ LetRec
 					fisneg : (float -> bool)
 					x : float
 					Let
-						Td133 : float
+						Td134 : float
 						Float 0.000000
-						IfLE Td133 x
+						IfLE Td134 x
 							Int 0
 							Int 1
 				LetRec
@@ -1034,9 +1040,9 @@ LetRec
 						fiszero : (float -> bool)
 						x : float
 						Let
-							Td132 : float
+							Td133 : float
 							Float 0.000000
-							IfEq x Td132
+							IfEq x Td133
 								Int 1
 								Int 0
 					LetRec
@@ -1045,14 +1051,14 @@ LetRec
 							x : bool
 							y : bool
 							Let
-								Ti130 : int
+								Ti131 : int
 								Int 0
-								IfEq x Ti130
+								IfEq x Ti131
 									Var y
 									Let
-										Ti131 : int
+										Ti132 : int
 										Int 0
-										IfEq y Ti131
+										IfEq y Ti132
 											Int 1
 											Int 0
 						LetRec
@@ -1060,9 +1066,9 @@ LetRec
 								fhalf : (float -> float)
 								x : float
 								Let
-									Td129 : float
+									Td130 : float
 									Float 0.500000
-									FMul x Td129
+									FMul x Td130
 							LetRec
 								FunDef
 									fsqr : (float -> float)
@@ -1073,9 +1079,9 @@ LetRec
 										fabs : (float -> float)
 										x : float
 										Let
-											Td128 : float
+											Td129 : float
 											Float 0.000000
-											IfLE Td128 x
+											IfLE Td129 x
 												Var x
 												FNeg x
 									LetRec
@@ -1090,20 +1096,20 @@ LetRec
 												Let
 													y : float
 													Let
-														Ti125 : int
+														Ti126 : int
 														ExtFunApp int_of_float x 
-														ExtFunApp float_of_int Ti125 
+														ExtFunApp float_of_int Ti126 
 													Let
-														Td126 : float
+														Td127 : float
 														Float 0.000000
-														IfLE Td126 x
+														IfLE Td127 x
 															Var y
 															IfEq x y
 																Var x
 																Let
-																	Td127 : float
+																	Td128 : float
 																	Float 1.000000
-																	FSub y Td127
+																	FSub y Td128
 											LetRec
 												FunDef
 													taylor_cos : (float -> float)
@@ -1112,33 +1118,33 @@ LetRec
 														x2 : float
 														FMul x x
 														Let
-															Td116 : float
+															Td117 : float
 															Float 1.000000
 															Let
-																Td124 : float
+																Td125 : float
 																Let
-																	Td123 : float
+																	Td124 : float
 																	Let
-																		Td117 : float
+																		Td118 : float
 																		Float 0.500000
 																		Let
-																			Td122 : float
+																			Td123 : float
 																			Let
-																				Td121 : float
+																				Td122 : float
 																				Let
-																					Td118 : float
+																					Td119 : float
 																					Float 0.041664
 																					Let
-																						Td120 : float
+																						Td121 : float
 																						Let
-																							Td119 : float
+																							Td120 : float
 																							Float 0.001370
-																							FMul x2 Td119
-																						FSub Td118 Td120
-																				FMul x2 Td121
-																			FSub Td117 Td122
-																	FMul x2 Td123
-																FSub Td116 Td124
+																							FMul x2 Td120
+																						FSub Td119 Td121
+																				FMul x2 Td122
+																			FSub Td118 Td123
+																	FMul x2 Td124
+																FSub Td117 Td125
 												LetRec
 													FunDef
 														taylor_sin : (float -> float)
@@ -1147,265 +1153,265 @@ LetRec
 															x2 : float
 															FMul x x
 															Let
-																Td115 : float
+																Td116 : float
 																Let
-																	Td106 : float
+																	Td107 : float
 																	Float 1.000000
 																	Let
-																		Td114 : float
+																		Td115 : float
 																		Let
-																			Td113 : float
+																			Td114 : float
 																			Let
-																				Td107 : float
+																				Td108 : float
 																				Float 0.166667
 																				Let
-																					Td112 : float
+																					Td113 : float
 																					Let
-																						Td111 : float
+																						Td112 : float
 																						Let
-																							Td108 : float
+																							Td109 : float
 																							Float 0.008333
 																							Let
-																								Td110 : float
+																								Td111 : float
 																								Let
-																									Td109 : float
+																									Td110 : float
 																									Float 0.000196
-																									FMul x2 Td109
-																								FSub Td108 Td110
-																						FMul x2 Td111
-																					FSub Td107 Td112
-																			FMul x2 Td113
-																		FSub Td106 Td114
-																FMul x Td115
+																									FMul x2 Td110
+																								FSub Td109 Td111
+																						FMul x2 Td112
+																					FSub Td108 Td113
+																			FMul x2 Td114
+																		FSub Td107 Td115
+																FMul x Td116
 													LetRec
 														FunDef
 															cos : (float -> float)
 															x : float
 															Let
-																Td77 : float
+																Td78 : float
 																Float 0.000000
-																IfLE Td77 x
+																IfLE Td78 x
 																	Let
-																		Td78 : float
+																		Td79 : float
 																		Float 6.283185
-																		IfLE x Td78
+																		IfLE x Td79
 																			Let
-																				Td79 : float
+																				Td80 : float
 																				Float 3.141593
-																				IfLE Td79 x
+																				IfLE Td80 x
 																					Let
 																						y : float
 																						Let
-																							Td80 : float
-																							Float 3.141593
-																							FSub x Td80
-																						Let
 																							Td81 : float
+																							Float 3.141593
+																							FSub x Td81
+																						Let
+																							Td82 : float
 																							Float 1.570796
-																							IfLE Td81 y
+																							IfLE Td82 y
 																								Let
-																									Td82 : float
+																									Td83 : float
 																									Float 2.356195
-																									IfLE Td82 y
+																									IfLE Td83 y
 																										Let
-																											Td84 : float
+																											Td85 : float
 																											Let
-																												Td83 : float
+																												Td84 : float
 																												Float 3.141593
-																												FSub Td83 y
-																											App taylor_cos Td84 
+																												FSub Td84 y
+																											App taylor_cos Td85 
 																										Let
-																											Td86 : float
+																											Td87 : float
 																											Let
-																												Td85 : float
+																												Td86 : float
 																												Float 1.570796
-																												FSub y Td85
-																											App taylor_sin Td86 
+																												FSub y Td86
+																											App taylor_sin Td87 
 																								Let
-																									Td87 : float
+																									Td88 : float
 																									Float 0.785398
-																									IfLE Td87 y
-																										Let
-																											Td90 : float
-																											Let
-																												Td89 : float
-																												Let
-																													Td88 : float
-																													Float 1.570796
-																													FSub Td88 y
-																												App taylor_sin Td89 
-																											FNeg Td90
+																									IfLE Td88 y
 																										Let
 																											Td91 : float
-																											App taylor_cos y 
+																											Let
+																												Td90 : float
+																												Let
+																													Td89 : float
+																													Float 1.570796
+																													FSub Td89 y
+																												App taylor_sin Td90 
 																											FNeg Td91
+																										Let
+																											Td92 : float
+																											App taylor_cos y 
+																											FNeg Td92
 																					Let
-																						Td92 : float
+																						Td93 : float
 																						Float 1.570796
-																						IfLE Td92 x
+																						IfLE Td93 x
 																							Let
-																								Td93 : float
+																								Td94 : float
 																								Float 2.356195
-																								IfLE Td93 x
+																								IfLE Td94 x
 																									Let
-																										Td96 : float
+																										Td97 : float
 																										Let
-																											Td95 : float
+																											Td96 : float
 																											Let
-																												Td94 : float
+																												Td95 : float
 																												Float 3.141593
-																												FSub Td94 x
-																											App taylor_cos Td95 
-																										FNeg Td96
+																												FSub Td95 x
+																											App taylor_cos Td96 
+																										FNeg Td97
 																									Let
-																										Td99 : float
+																										Td100 : float
 																										Let
-																											Td98 : float
+																											Td99 : float
 																											Let
-																												Td97 : float
+																												Td98 : float
 																												Float 1.570796
-																												FSub x Td97
-																											App taylor_sin Td98 
-																										FNeg Td99
+																												FSub x Td98
+																											App taylor_sin Td99 
+																										FNeg Td100
 																							Let
-																								Td100 : float
+																								Td101 : float
 																								Float 0.785398
-																								IfLE Td100 x
+																								IfLE Td101 x
 																									Let
-																										Td102 : float
+																										Td103 : float
 																										Let
-																											Td101 : float
+																											Td102 : float
 																											Float 1.570796
-																											FSub Td101 x
-																										App taylor_sin Td102 
+																											FSub Td102 x
+																										App taylor_sin Td103 
 																									App taylor_cos x 
 																			Let
-																				Td104 : float
+																				Td105 : float
 																				Let
-																					Td103 : float
+																					Td104 : float
 																					Float 6.283185
-																					FSub x Td103
-																				App cos Td104 
+																					FSub x Td104
+																				App cos Td105 
 																	Let
-																		Td105 : float
+																		Td106 : float
 																		FNeg x
-																		App cos Td105 
+																		App cos Td106 
 														LetRec
 															FunDef
 																sin : (float -> float)
 																x : float
 																Let
-																	Td47 : float
+																	Td48 : float
 																	Float 0.000000
-																	IfLE Td47 x
+																	IfLE Td48 x
 																		Let
-																			Td48 : float
+																			Td49 : float
 																			Float 6.283185
-																			IfLE x Td48
+																			IfLE x Td49
 																				Let
-																					Td49 : float
+																					Td50 : float
 																					Float 3.141593
-																					IfLE Td49 x
+																					IfLE Td50 x
 																						Let
 																							y : float
 																							Let
-																								Td50 : float
-																								Float 3.141593
-																								FSub x Td50
-																							Let
 																								Td51 : float
+																								Float 3.141593
+																								FSub x Td51
+																							Let
+																								Td52 : float
 																								Float 1.570796
-																								IfLE Td51 y
+																								IfLE Td52 y
 																									Let
-																										Td52 : float
+																										Td53 : float
 																										Float 2.356195
-																										IfLE Td52 y
+																										IfLE Td53 y
 																											Let
-																												Td55 : float
+																												Td56 : float
 																												Let
-																													Td54 : float
+																													Td55 : float
 																													Let
-																														Td53 : float
+																														Td54 : float
 																														Float 3.141593
-																														FSub Td53 y
-																													App taylor_sin Td54 
-																												FNeg Td55
+																														FSub Td54 y
+																													App taylor_sin Td55 
+																												FNeg Td56
 																											Let
-																												Td58 : float
+																												Td59 : float
 																												Let
-																													Td57 : float
+																													Td58 : float
 																													Let
-																														Td56 : float
+																														Td57 : float
 																														Float 1.570796
-																														FSub y Td56
-																													App taylor_cos Td57 
-																												FNeg Td58
+																														FSub y Td57
+																													App taylor_cos Td58 
+																												FNeg Td59
 																									Let
-																										Td59 : float
+																										Td60 : float
 																										Float 0.785398
-																										IfLE Td59 y
-																											Let
-																												Td62 : float
-																												Let
-																													Td61 : float
-																													Let
-																														Td60 : float
-																														Float 1.570796
-																														FSub Td60 y
-																													App taylor_cos Td61 
-																												FNeg Td62
+																										IfLE Td60 y
 																											Let
 																												Td63 : float
-																												App taylor_sin y 
+																												Let
+																													Td62 : float
+																													Let
+																														Td61 : float
+																														Float 1.570796
+																														FSub Td61 y
+																													App taylor_cos Td62 
 																												FNeg Td63
+																											Let
+																												Td64 : float
+																												App taylor_sin y 
+																												FNeg Td64
 																						Let
-																							Td64 : float
+																							Td65 : float
 																							Float 1.570796
-																							IfLE Td64 x
+																							IfLE Td65 x
 																								Let
-																									Td65 : float
+																									Td66 : float
 																									Float 2.356195
-																									IfLE Td65 x
+																									IfLE Td66 x
 																										Let
-																											Td67 : float
+																											Td68 : float
 																											Let
-																												Td66 : float
+																												Td67 : float
 																												Float 3.141593
-																												FSub Td66 x
-																											App taylor_sin Td67 
+																												FSub Td67 x
+																											App taylor_sin Td68 
 																										Let
-																											Td69 : float
+																											Td70 : float
 																											Let
-																												Td68 : float
+																												Td69 : float
 																												Float 1.570796
-																												FSub x Td68
-																											App taylor_cos Td69 
+																												FSub x Td69
+																											App taylor_cos Td70 
 																								Let
-																									Td70 : float
+																									Td71 : float
 																									Float 0.785398
-																									IfLE Td70 x
+																									IfLE Td71 x
 																										Let
-																											Td72 : float
+																											Td73 : float
 																											Let
-																												Td71 : float
+																												Td72 : float
 																												Float 1.570796
-																												FSub Td71 x
-																											App taylor_cos Td72 
+																												FSub Td72 x
+																											App taylor_cos Td73 
 																										App taylor_sin x 
 																				Let
-																					Td74 : float
+																					Td75 : float
 																					Let
-																						Td73 : float
+																						Td74 : float
 																						Float 6.283185
-																						FSub x Td73
-																					App sin Td74 
+																						FSub x Td74
+																					App sin Td75 
 																		Let
-																			Td76 : float
+																			Td77 : float
 																			Let
-																				Td75 : float
+																				Td76 : float
 																				FNeg x
-																				App sin Td75 
-																			FNeg Td76
+																				App sin Td76 
+																			FNeg Td77
 															LetRec
 																FunDef
 																	taylor_atan : (float -> float)
@@ -1414,122 +1420,122 @@ LetRec
 																		x2 : float
 																		FMul x x
 																		Let
-																			Td46 : float
+																			Td47 : float
 																			Let
-																				Td28 : float
+																				Td29 : float
 																				Float 1.000000
 																				Let
-																					Td45 : float
+																					Td46 : float
 																					Let
-																						Td44 : float
+																						Td45 : float
 																						Let
-																							Td29 : float
+																							Td30 : float
 																							Float 0.333333
 																							Let
-																								Td43 : float
+																								Td44 : float
 																								Let
-																									Td42 : float
+																									Td43 : float
 																									Let
-																										Td30 : float
+																										Td31 : float
 																										Float 0.200000
 																										Let
-																											Td41 : float
+																											Td42 : float
 																											Let
-																												Td40 : float
+																												Td41 : float
 																												Let
-																													Td31 : float
+																													Td32 : float
 																													Float 0.142857
 																													Let
-																														Td39 : float
+																														Td40 : float
 																														Let
-																															Td38 : float
+																															Td39 : float
 																															Let
-																																Td32 : float
+																																Td33 : float
 																																Float 0.111111
 																																Let
-																																	Td37 : float
+																																	Td38 : float
 																																	Let
-																																		Td36 : float
+																																		Td37 : float
 																																		Let
-																																			Td33 : float
+																																			Td34 : float
 																																			Float 0.089764
 																																			Let
-																																				Td35 : float
+																																				Td36 : float
 																																				Let
-																																					Td34 : float
+																																					Td35 : float
 																																					Float 0.060035
-																																					FMul Td34 x2
-																																				FSub Td33 Td35
-																																		FMul x2 Td36
-																																	FSub Td32 Td37
-																															FMul x2 Td38
-																														FSub Td31 Td39
-																												FMul x2 Td40
-																											FSub Td30 Td41
-																									FMul x2 Td42
-																								FSub Td29 Td43
-																						FMul x2 Td44
-																					FSub Td28 Td45
-																			FMul x Td46
+																																					FMul Td35 x2
+																																				FSub Td34 Td36
+																																		FMul x2 Td37
+																																	FSub Td33 Td38
+																															FMul x2 Td39
+																														FSub Td32 Td40
+																												FMul x2 Td41
+																											FSub Td31 Td42
+																									FMul x2 Td43
+																								FSub Td30 Td44
+																						FMul x2 Td45
+																					FSub Td29 Td46
+																			FMul x Td47
 																LetRec
 																	FunDef
 																		atan : (float -> float)
 																		x : float
 																		Let
-																			Td13 : float
+																			Td14 : float
 																			Float 0.000000
-																			IfLE Td13 x
+																			IfLE Td14 x
 																				Let
-																					Td14 : float
+																					Td15 : float
 																					Float 0.437500
-																					IfLE Td14 x
+																					IfLE Td15 x
 																						Let
-																							Td15 : float
+																							Td16 : float
 																							Float 2.356195
-																							IfLE Td15 x
+																							IfLE Td16 x
 																								Let
-																									Td16 : float
+																									Td17 : float
 																									Float 1.570796
 																									Let
-																										Td19 : float
+																										Td20 : float
 																										Let
-																											Td18 : float
+																											Td19 : float
 																											Let
-																												Td17 : float
+																												Td18 : float
 																												Float 1.000000
-																												FDiv Td17 x
-																											App taylor_atan Td18 
-																										FSub Td16 Td19
+																												FDiv Td18 x
+																											App taylor_atan Td19 
+																										FSub Td17 Td20
 																								Let
-																									Td20 : float
+																									Td21 : float
 																									Float 0.785398
 																									Let
-																										Td26 : float
+																										Td27 : float
 																										Let
-																											Td25 : float
+																											Td26 : float
 																											Let
-																												Td22 : float
+																												Td23 : float
 																												Let
-																													Td21 : float
+																													Td22 : float
 																													Float 1.000000
-																													FSub x Td21
+																													FSub x Td22
 																												Let
-																													Td24 : float
+																													Td25 : float
 																													Let
-																														Td23 : float
+																														Td24 : float
 																														Float 1.000000
-																														FAdd x Td23
-																													FDiv Td22 Td24
-																											App taylor_atan Td25 
-																										FAdd Td20 Td26
+																														FAdd x Td24
+																													FDiv Td23 Td25
+																											App taylor_atan Td26 
+																										FAdd Td21 Td27
 																						App taylor_atan x 
 																				Let
 																					y : float
 																					FNeg x
 																					Let
-																						Td27 : float
+																						Td28 : float
 																						App atan y 
-																						FNeg Td27
+																						FNeg Td28
 																	LetRec
 																		FunDef
 																			add : (int -> int)
@@ -1538,40 +1544,43 @@ LetRec
 																				Ti3 : int
 																				Int 2
 																				IfLE n Ti3
-																					Int 1
 																					Let
-																						Ti10 : int
+																						Tu4 : unit
+																						Unit
+																						ExtFunApp read_int Tu4 
+																					Let
+																						Ti11 : int
 																						Let
-																							Ti6 : int
+																							Ti7 : int
 																							Let
-																								Ti5 : int
+																								Ti6 : int
 																								Let
-																									Ti4 : int
+																									Ti5 : int
 																									Int 1
-																									Sub n Ti4
-																								App add Ti5 
+																									Sub n Ti5
+																								App add Ti6 
 																							Let
-																								Ti9 : int
+																								Ti10 : int
 																								Let
-																									Ti8 : int
+																									Ti9 : int
 																									Let
-																										Ti7 : int
+																										Ti8 : int
 																										Int 2
-																										Sub n Ti7
-																									App add Ti8 
-																								Add Ti6 Ti9
+																										Sub n Ti8
+																									App add Ti9 
+																								Add Ti7 Ti10
 																						Let
-																							Ti12 : int
+																							Ti13 : int
 																							Let
-																								Tu11 : unit
+																								Tu12 : unit
 																								Unit
-																								ExtFunApp read_int Tu11 
-																							Add Ti10 Ti12
+																								ExtFunApp read_int Tu12 
+																							Add Ti11 Ti13
 																		Let
 																			Ti2 : int
 																			Let
 																				Ti1 : int
-																				Int 7
+																				Int 10
 																				App add Ti1 
 																			ExtFunApp print_int Ti2 
 
@@ -1579,867 +1588,894 @@ LetRec
 <****** Alpha ******>
 LetRec
 	FunDef
-		fequal.139 : (float -> float -> bool)
-		x.140 : float
-		y.141 : float
+		fequal.140 : (float -> float -> bool)
+		x.141 : float
+		y.142 : float
 		Let
-			Td138.321 : float
+			Td139.323 : float
 			Let
-				Td137.322 : float
+				Td138.324 : float
 				Float 0.000000
-				FAdd x.140 Td137.322
-			IfEq Td138.321 y.141
+				FAdd x.141 Td138.324
+			IfEq Td139.323 y.142
 				Int 1
 				Int 0
 	LetRec
 		FunDef
-			fless.142 : (float -> float -> bool)
-			x.143 : float
-			y.144 : float
+			fless.143 : (float -> float -> bool)
+			x.144 : float
+			y.145 : float
 			Let
-				Td136.319 : float
+				Td137.321 : float
 				Let
-					Td135.320 : float
+					Td136.322 : float
 					Float 0.000000
-					FAdd x.143 Td135.320
-				IfLE y.144 Td136.319
+					FAdd x.144 Td136.322
+				IfLE y.145 Td137.321
 					Int 0
 					Int 1
 		LetRec
 			FunDef
-				fispos.145 : (float -> bool)
-				x.146 : float
+				fispos.146 : (float -> bool)
+				x.147 : float
 				Let
-					Td134.318 : float
+					Td135.320 : float
 					Float 0.000000
-					IfLE x.146 Td134.318
+					IfLE x.147 Td135.320
 						Int 0
 						Int 1
 			LetRec
 				FunDef
-					fisneg.147 : (float -> bool)
-					x.148 : float
+					fisneg.148 : (float -> bool)
+					x.149 : float
 					Let
-						Td133.317 : float
+						Td134.319 : float
 						Float 0.000000
-						IfLE Td133.317 x.148
+						IfLE Td134.319 x.149
 							Int 0
 							Int 1
 				LetRec
 					FunDef
-						fiszero.149 : (float -> bool)
-						x.150 : float
+						fiszero.150 : (float -> bool)
+						x.151 : float
 						Let
-							Td132.316 : float
+							Td133.318 : float
 							Float 0.000000
-							IfEq x.150 Td132.316
+							IfEq x.151 Td133.318
 								Int 1
 								Int 0
 					LetRec
 						FunDef
-							xor.151 : (bool -> bool -> bool)
-							x.152 : bool
-							y.153 : bool
+							xor.152 : (bool -> bool -> bool)
+							x.153 : bool
+							y.154 : bool
 							Let
-								Ti130.314 : int
+								Ti131.316 : int
 								Int 0
-								IfEq x.152 Ti130.314
-									Var y.153
+								IfEq x.153 Ti131.316
+									Var y.154
 									Let
-										Ti131.315 : int
+										Ti132.317 : int
 										Int 0
-										IfEq y.153 Ti131.315
+										IfEq y.154 Ti132.317
 											Int 1
 											Int 0
 						LetRec
 							FunDef
-								fhalf.154 : (float -> float)
-								x.155 : float
+								fhalf.155 : (float -> float)
+								x.156 : float
 								Let
-									Td129.313 : float
+									Td130.315 : float
 									Float 0.500000
-									FMul x.155 Td129.313
+									FMul x.156 Td130.315
 							LetRec
 								FunDef
-									fsqr.156 : (float -> float)
-									x.157 : float
-									FMul x.157 x.157
+									fsqr.157 : (float -> float)
+									x.158 : float
+									FMul x.158 x.158
 								LetRec
 									FunDef
-										fabs.158 : (float -> float)
-										x.159 : float
+										fabs.159 : (float -> float)
+										x.160 : float
 										Let
-											Td128.312 : float
+											Td129.314 : float
 											Float 0.000000
-											IfLE Td128.312 x.159
-												Var x.159
-												FNeg x.159
+											IfLE Td129.314 x.160
+												Var x.160
+												FNeg x.160
 									LetRec
 										FunDef
-											fneg.160 : (float -> float)
-											x.161 : float
-											FNeg x.161
+											fneg.161 : (float -> float)
+											x.162 : float
+											FNeg x.162
 										LetRec
 											FunDef
-												floor.162 : (float -> float)
-												x.163 : float
+												floor.163 : (float -> float)
+												x.164 : float
 												Let
-													y.308 : float
+													y.310 : float
 													Let
-														Ti125.311 : int
-														ExtFunApp int_of_float x.163 
-														ExtFunApp float_of_int Ti125.311 
+														Ti126.313 : int
+														ExtFunApp int_of_float x.164 
+														ExtFunApp float_of_int Ti126.313 
 													Let
-														Td126.309 : float
+														Td127.311 : float
 														Float 0.000000
-														IfLE Td126.309 x.163
-															Var y.308
-															IfEq x.163 y.308
-																Var x.163
+														IfLE Td127.311 x.164
+															Var y.310
+															IfEq x.164 y.310
+																Var x.164
 																Let
-																	Td127.310 : float
+																	Td128.312 : float
 																	Float 1.000000
-																	FSub y.308 Td127.310
+																	FSub y.310 Td128.312
 											LetRec
 												FunDef
-													taylor_cos.164 : (float -> float)
-													x.165 : float
+													taylor_cos.165 : (float -> float)
+													x.166 : float
 													Let
-														x2.298 : float
-														FMul x.165 x.165
+														x2.300 : float
+														FMul x.166 x.166
 														Let
-															Td116.299 : float
+															Td117.301 : float
 															Float 1.000000
 															Let
-																Td124.300 : float
+																Td125.302 : float
 																Let
-																	Td123.301 : float
+																	Td124.303 : float
 																	Let
-																		Td117.302 : float
+																		Td118.304 : float
 																		Float 0.500000
 																		Let
-																			Td122.303 : float
+																			Td123.305 : float
 																			Let
-																				Td121.304 : float
+																				Td122.306 : float
 																				Let
-																					Td118.305 : float
+																					Td119.307 : float
 																					Float 0.041664
 																					Let
-																						Td120.306 : float
+																						Td121.308 : float
 																						Let
-																							Td119.307 : float
+																							Td120.309 : float
 																							Float 0.001370
-																							FMul x2.298 Td119.307
-																						FSub Td118.305 Td120.306
-																				FMul x2.298 Td121.304
-																			FSub Td117.302 Td122.303
-																	FMul x2.298 Td123.301
-																FSub Td116.299 Td124.300
+																							FMul x2.300 Td120.309
+																						FSub Td119.307 Td121.308
+																				FMul x2.300 Td122.306
+																			FSub Td118.304 Td123.305
+																	FMul x2.300 Td124.303
+																FSub Td117.301 Td125.302
 												LetRec
 													FunDef
-														taylor_sin.166 : (float -> float)
-														x.167 : float
+														taylor_sin.167 : (float -> float)
+														x.168 : float
 														Let
-															x2.287 : float
-															FMul x.167 x.167
+															x2.289 : float
+															FMul x.168 x.168
 															Let
-																Td115.288 : float
+																Td116.290 : float
 																Let
-																	Td106.289 : float
+																	Td107.291 : float
 																	Float 1.000000
 																	Let
-																		Td114.290 : float
+																		Td115.292 : float
 																		Let
-																			Td113.291 : float
+																			Td114.293 : float
 																			Let
-																				Td107.292 : float
+																				Td108.294 : float
 																				Float 0.166667
 																				Let
-																					Td112.293 : float
+																					Td113.295 : float
 																					Let
-																						Td111.294 : float
+																						Td112.296 : float
 																						Let
-																							Td108.295 : float
+																							Td109.297 : float
 																							Float 0.008333
 																							Let
-																								Td110.296 : float
+																								Td111.298 : float
 																								Let
-																									Td109.297 : float
+																									Td110.299 : float
 																									Float 0.000196
-																									FMul x2.287 Td109.297
-																								FSub Td108.295 Td110.296
-																						FMul x2.287 Td111.294
-																					FSub Td107.292 Td112.293
-																			FMul x2.287 Td113.291
-																		FSub Td106.289 Td114.290
-																FMul x.167 Td115.288
+																									FMul x2.289 Td110.299
+																								FSub Td109.297 Td111.298
+																						FMul x2.289 Td112.296
+																					FSub Td108.294 Td113.295
+																			FMul x2.289 Td114.293
+																		FSub Td107.291 Td115.292
+																FMul x.168 Td116.290
 													LetRec
 														FunDef
-															cos.168 : (float -> float)
-															x.169 : float
+															cos.169 : (float -> float)
+															x.170 : float
 															Let
-																Td77.257 : float
+																Td78.259 : float
 																Float 0.000000
-																IfLE Td77.257 x.169
+																IfLE Td78.259 x.170
 																	Let
-																		Td78.259 : float
+																		Td79.261 : float
 																		Float 6.283185
-																		IfLE x.169 Td78.259
+																		IfLE x.170 Td79.261
 																			Let
-																				Td79.262 : float
+																				Td80.264 : float
 																				Float 3.141593
-																				IfLE Td79.262 x.169
+																				IfLE Td80.264 x.170
 																					Let
-																						y.274 : float
+																						y.276 : float
 																						Let
-																							Td80.286 : float
+																							Td81.288 : float
 																							Float 3.141593
-																							FSub x.169 Td80.286
+																							FSub x.170 Td81.288
 																						Let
-																							Td81.275 : float
+																							Td82.277 : float
 																							Float 1.570796
-																							IfLE Td81.275 y.274
+																							IfLE Td82.277 y.276
 																								Let
-																									Td82.281 : float
+																									Td83.283 : float
 																									Float 2.356195
-																									IfLE Td82.281 y.274
+																									IfLE Td83.283 y.276
 																										Let
-																											Td84.284 : float
+																											Td85.286 : float
 																											Let
-																												Td83.285 : float
+																												Td84.287 : float
 																												Float 3.141593
-																												FSub Td83.285 y.274
-																											App taylor_cos.164 Td84.284 
+																												FSub Td84.287 y.276
+																											App taylor_cos.165 Td85.286 
 																										Let
-																											Td86.282 : float
+																											Td87.284 : float
 																											Let
-																												Td85.283 : float
+																												Td86.285 : float
 																												Float 1.570796
-																												FSub y.274 Td85.283
-																											App taylor_sin.166 Td86.282 
+																												FSub y.276 Td86.285
+																											App taylor_sin.167 Td87.284 
 																								Let
-																									Td87.276 : float
+																									Td88.278 : float
 																									Float 0.785398
-																									IfLE Td87.276 y.274
+																									IfLE Td88.278 y.276
 																										Let
-																											Td90.278 : float
+																											Td91.280 : float
 																											Let
-																												Td89.279 : float
+																												Td90.281 : float
 																												Let
-																													Td88.280 : float
+																													Td89.282 : float
 																													Float 1.570796
-																													FSub Td88.280 y.274
-																												App taylor_sin.166 Td89.279 
-																											FNeg Td90.278
+																													FSub Td89.282 y.276
+																												App taylor_sin.167 Td90.281 
+																											FNeg Td91.280
 																										Let
-																											Td91.277 : float
-																											App taylor_cos.164 y.274 
-																											FNeg Td91.277
+																											Td92.279 : float
+																											App taylor_cos.165 y.276 
+																											FNeg Td92.279
 																					Let
-																						Td92.263 : float
+																						Td93.265 : float
 																						Float 1.570796
-																						IfLE Td92.263 x.169
+																						IfLE Td93.265 x.170
 																							Let
-																								Td93.267 : float
+																								Td94.269 : float
 																								Float 2.356195
-																								IfLE Td93.267 x.169
+																								IfLE Td94.269 x.170
 																									Let
-																										Td96.271 : float
+																										Td97.273 : float
 																										Let
-																											Td95.272 : float
+																											Td96.274 : float
 																											Let
-																												Td94.273 : float
+																												Td95.275 : float
 																												Float 3.141593
-																												FSub Td94.273 x.169
-																											App taylor_cos.164 Td95.272 
-																										FNeg Td96.271
+																												FSub Td95.275 x.170
+																											App taylor_cos.165 Td96.274 
+																										FNeg Td97.273
 																									Let
-																										Td99.268 : float
+																										Td100.270 : float
 																										Let
-																											Td98.269 : float
+																											Td99.271 : float
 																											Let
-																												Td97.270 : float
+																												Td98.272 : float
 																												Float 1.570796
-																												FSub x.169 Td97.270
-																											App taylor_sin.166 Td98.269 
-																										FNeg Td99.268
+																												FSub x.170 Td98.272
+																											App taylor_sin.167 Td99.271 
+																										FNeg Td100.270
 																							Let
-																								Td100.264 : float
+																								Td101.266 : float
 																								Float 0.785398
-																								IfLE Td100.264 x.169
+																								IfLE Td101.266 x.170
 																									Let
-																										Td102.265 : float
+																										Td103.267 : float
 																										Let
-																											Td101.266 : float
+																											Td102.268 : float
 																											Float 1.570796
-																											FSub Td101.266 x.169
-																										App taylor_sin.166 Td102.265 
-																									App taylor_cos.164 x.169 
+																											FSub Td102.268 x.170
+																										App taylor_sin.167 Td103.267 
+																									App taylor_cos.165 x.170 
 																			Let
-																				Td104.260 : float
+																				Td105.262 : float
 																				Let
-																					Td103.261 : float
+																					Td104.263 : float
 																					Float 6.283185
-																					FSub x.169 Td103.261
-																				App cos.168 Td104.260 
+																					FSub x.170 Td104.263
+																				App cos.169 Td105.262 
 																	Let
-																		Td105.258 : float
-																		FNeg x.169
-																		App cos.168 Td105.258 
+																		Td106.260 : float
+																		FNeg x.170
+																		App cos.169 Td106.260 
 														LetRec
 															FunDef
-																sin.170 : (float -> float)
-																x.171 : float
+																sin.171 : (float -> float)
+																x.172 : float
 																Let
-																	Td47.226 : float
+																	Td48.228 : float
 																	Float 0.000000
-																	IfLE Td47.226 x.171
+																	IfLE Td48.228 x.172
 																		Let
-																			Td48.229 : float
+																			Td49.231 : float
 																			Float 6.283185
-																			IfLE x.171 Td48.229
+																			IfLE x.172 Td49.231
 																				Let
-																					Td49.232 : float
+																					Td50.234 : float
 																					Float 3.141593
-																					IfLE Td49.232 x.171
+																					IfLE Td50.234 x.172
 																						Let
-																							y.242 : float
+																							y.244 : float
 																							Let
-																								Td50.256 : float
+																								Td51.258 : float
 																								Float 3.141593
-																								FSub x.171 Td50.256
+																								FSub x.172 Td51.258
 																							Let
-																								Td51.243 : float
+																								Td52.245 : float
 																								Float 1.570796
-																								IfLE Td51.243 y.242
+																								IfLE Td52.245 y.244
 																									Let
-																										Td52.249 : float
+																										Td53.251 : float
 																										Float 2.356195
-																										IfLE Td52.249 y.242
+																										IfLE Td53.251 y.244
 																											Let
-																												Td55.253 : float
+																												Td56.255 : float
 																												Let
-																													Td54.254 : float
+																													Td55.256 : float
 																													Let
-																														Td53.255 : float
+																														Td54.257 : float
 																														Float 3.141593
-																														FSub Td53.255 y.242
-																													App taylor_sin.166 Td54.254 
-																												FNeg Td55.253
+																														FSub Td54.257 y.244
+																													App taylor_sin.167 Td55.256 
+																												FNeg Td56.255
 																											Let
-																												Td58.250 : float
+																												Td59.252 : float
 																												Let
-																													Td57.251 : float
+																													Td58.253 : float
 																													Let
-																														Td56.252 : float
+																														Td57.254 : float
 																														Float 1.570796
-																														FSub y.242 Td56.252
-																													App taylor_cos.164 Td57.251 
-																												FNeg Td58.250
+																														FSub y.244 Td57.254
+																													App taylor_cos.165 Td58.253 
+																												FNeg Td59.252
 																									Let
-																										Td59.244 : float
+																										Td60.246 : float
 																										Float 0.785398
-																										IfLE Td59.244 y.242
+																										IfLE Td60.246 y.244
 																											Let
-																												Td62.246 : float
+																												Td63.248 : float
 																												Let
-																													Td61.247 : float
+																													Td62.249 : float
 																													Let
-																														Td60.248 : float
+																														Td61.250 : float
 																														Float 1.570796
-																														FSub Td60.248 y.242
-																													App taylor_cos.164 Td61.247 
-																												FNeg Td62.246
+																														FSub Td61.250 y.244
+																													App taylor_cos.165 Td62.249 
+																												FNeg Td63.248
 																											Let
-																												Td63.245 : float
-																												App taylor_sin.166 y.242 
-																												FNeg Td63.245
+																												Td64.247 : float
+																												App taylor_sin.167 y.244 
+																												FNeg Td64.247
 																						Let
-																							Td64.233 : float
+																							Td65.235 : float
 																							Float 1.570796
-																							IfLE Td64.233 x.171
+																							IfLE Td65.235 x.172
 																								Let
-																									Td65.237 : float
+																									Td66.239 : float
 																									Float 2.356195
-																									IfLE Td65.237 x.171
+																									IfLE Td66.239 x.172
 																										Let
-																											Td67.240 : float
+																											Td68.242 : float
 																											Let
-																												Td66.241 : float
+																												Td67.243 : float
 																												Float 3.141593
-																												FSub Td66.241 x.171
-																											App taylor_sin.166 Td67.240 
+																												FSub Td67.243 x.172
+																											App taylor_sin.167 Td68.242 
 																										Let
-																											Td69.238 : float
+																											Td70.240 : float
 																											Let
-																												Td68.239 : float
+																												Td69.241 : float
 																												Float 1.570796
-																												FSub x.171 Td68.239
-																											App taylor_cos.164 Td69.238 
+																												FSub x.172 Td69.241
+																											App taylor_cos.165 Td70.240 
 																								Let
-																									Td70.234 : float
+																									Td71.236 : float
 																									Float 0.785398
-																									IfLE Td70.234 x.171
+																									IfLE Td71.236 x.172
 																										Let
-																											Td72.235 : float
+																											Td73.237 : float
 																											Let
-																												Td71.236 : float
+																												Td72.238 : float
 																												Float 1.570796
-																												FSub Td71.236 x.171
-																											App taylor_cos.164 Td72.235 
-																										App taylor_sin.166 x.171 
+																												FSub Td72.238 x.172
+																											App taylor_cos.165 Td73.237 
+																										App taylor_sin.167 x.172 
 																				Let
-																					Td74.230 : float
+																					Td75.232 : float
 																					Let
-																						Td73.231 : float
+																						Td74.233 : float
 																						Float 6.283185
-																						FSub x.171 Td73.231
-																					App sin.170 Td74.230 
+																						FSub x.172 Td74.233
+																					App sin.171 Td75.232 
 																		Let
-																			Td76.227 : float
+																			Td77.229 : float
 																			Let
-																				Td75.228 : float
-																				FNeg x.171
-																				App sin.170 Td75.228 
-																			FNeg Td76.227
+																				Td76.230 : float
+																				FNeg x.172
+																				App sin.171 Td76.230 
+																			FNeg Td77.229
 															LetRec
 																FunDef
-																	taylor_atan.172 : (float -> float)
-																	x.173 : float
+																	taylor_atan.173 : (float -> float)
+																	x.174 : float
 																	Let
-																		x2.206 : float
-																		FMul x.173 x.173
+																		x2.208 : float
+																		FMul x.174 x.174
 																		Let
-																			Td46.207 : float
+																			Td47.209 : float
 																			Let
-																				Td28.208 : float
+																				Td29.210 : float
 																				Float 1.000000
 																				Let
-																					Td45.209 : float
+																					Td46.211 : float
 																					Let
-																						Td44.210 : float
+																						Td45.212 : float
 																						Let
-																							Td29.211 : float
+																							Td30.213 : float
 																							Float 0.333333
 																							Let
-																								Td43.212 : float
+																								Td44.214 : float
 																								Let
-																									Td42.213 : float
+																									Td43.215 : float
 																									Let
-																										Td30.214 : float
+																										Td31.216 : float
 																										Float 0.200000
 																										Let
-																											Td41.215 : float
+																											Td42.217 : float
 																											Let
-																												Td40.216 : float
+																												Td41.218 : float
 																												Let
-																													Td31.217 : float
+																													Td32.219 : float
 																													Float 0.142857
 																													Let
-																														Td39.218 : float
+																														Td40.220 : float
 																														Let
-																															Td38.219 : float
+																															Td39.221 : float
 																															Let
-																																Td32.220 : float
+																																Td33.222 : float
 																																Float 0.111111
 																																Let
-																																	Td37.221 : float
+																																	Td38.223 : float
 																																	Let
-																																		Td36.222 : float
+																																		Td37.224 : float
 																																		Let
-																																			Td33.223 : float
+																																			Td34.225 : float
 																																			Float 0.089764
 																																			Let
-																																				Td35.224 : float
+																																				Td36.226 : float
 																																				Let
-																																					Td34.225 : float
+																																					Td35.227 : float
 																																					Float 0.060035
-																																					FMul Td34.225 x2.206
-																																				FSub Td33.223 Td35.224
-																																		FMul x2.206 Td36.222
-																																	FSub Td32.220 Td37.221
-																															FMul x2.206 Td38.219
-																														FSub Td31.217 Td39.218
-																												FMul x2.206 Td40.216
-																											FSub Td30.214 Td41.215
-																									FMul x2.206 Td42.213
-																								FSub Td29.211 Td43.212
-																						FMul x2.206 Td44.210
-																					FSub Td28.208 Td45.209
-																			FMul x.173 Td46.207
+																																					FMul Td35.227 x2.208
+																																				FSub Td34.225 Td36.226
+																																		FMul x2.208 Td37.224
+																																	FSub Td33.222 Td38.223
+																															FMul x2.208 Td39.221
+																														FSub Td32.219 Td40.220
+																												FMul x2.208 Td41.218
+																											FSub Td31.216 Td42.217
+																									FMul x2.208 Td43.215
+																								FSub Td30.213 Td44.214
+																						FMul x2.208 Td45.212
+																					FSub Td29.210 Td46.211
+																			FMul x.174 Td47.209
 																LetRec
 																	FunDef
-																		atan.174 : (float -> float)
-																		x.175 : float
+																		atan.175 : (float -> float)
+																		x.176 : float
 																		Let
-																			Td13.190 : float
+																			Td14.192 : float
 																			Float 0.000000
-																			IfLE Td13.190 x.175
+																			IfLE Td14.192 x.176
 																				Let
-																					Td14.193 : float
+																					Td15.195 : float
 																					Float 0.437500
-																					IfLE Td14.193 x.175
+																					IfLE Td15.195 x.176
 																						Let
-																							Td15.194 : float
+																							Td16.196 : float
 																							Float 2.356195
-																							IfLE Td15.194 x.175
+																							IfLE Td16.196 x.176
 																								Let
-																									Td16.202 : float
+																									Td17.204 : float
 																									Float 1.570796
 																									Let
-																										Td19.203 : float
+																										Td20.205 : float
 																										Let
-																											Td18.204 : float
+																											Td19.206 : float
 																											Let
-																												Td17.205 : float
+																												Td18.207 : float
 																												Float 1.000000
-																												FDiv Td17.205 x.175
-																											App taylor_atan.172 Td18.204 
-																										FSub Td16.202 Td19.203
+																												FDiv Td18.207 x.176
+																											App taylor_atan.173 Td19.206 
+																										FSub Td17.204 Td20.205
 																								Let
-																									Td20.195 : float
+																									Td21.197 : float
 																									Float 0.785398
 																									Let
-																										Td26.196 : float
+																										Td27.198 : float
 																										Let
-																											Td25.197 : float
+																											Td26.199 : float
 																											Let
-																												Td22.198 : float
+																												Td23.200 : float
 																												Let
-																													Td21.201 : float
+																													Td22.203 : float
 																													Float 1.000000
-																													FSub x.175 Td21.201
+																													FSub x.176 Td22.203
 																												Let
-																													Td24.199 : float
+																													Td25.201 : float
 																													Let
-																														Td23.200 : float
+																														Td24.202 : float
 																														Float 1.000000
-																														FAdd x.175 Td23.200
-																													FDiv Td22.198 Td24.199
-																											App taylor_atan.172 Td25.197 
-																										FAdd Td20.195 Td26.196
-																						App taylor_atan.172 x.175 
+																														FAdd x.176 Td24.202
+																													FDiv Td23.200 Td25.201
+																											App taylor_atan.173 Td26.199 
+																										FAdd Td21.197 Td27.198
+																						App taylor_atan.173 x.176 
 																				Let
-																					y.191 : float
-																					FNeg x.175
+																					y.193 : float
+																					FNeg x.176
 																					Let
-																						Td27.192 : float
-																						App atan.174 y.191 
-																						FNeg Td27.192
+																						Td28.194 : float
+																						App atan.175 y.193 
+																						FNeg Td28.194
 																	LetRec
 																		FunDef
-																			add.176 : (int -> int)
-																			n.177 : int
+																			add.177 : (int -> int)
+																			n.178 : int
 																			Let
-																				Ti3.180 : int
+																				Ti3.181 : int
 																				Int 2
-																				IfLE n.177 Ti3.180
-																					Int 1
+																				IfLE n.178 Ti3.181
 																					Let
-																						Ti10.181 : int
+																						Tu4.191 : unit
+																						Unit
+																						ExtFunApp read_int Tu4.191 
+																					Let
+																						Ti11.182 : int
 																						Let
-																							Ti6.184 : int
+																							Ti7.185 : int
 																							Let
-																								Ti5.188 : int
+																								Ti6.189 : int
 																								Let
-																									Ti4.189 : int
+																									Ti5.190 : int
 																									Int 1
-																									Sub n.177 Ti4.189
-																								App add.176 Ti5.188 
+																									Sub n.178 Ti5.190
+																								App add.177 Ti6.189 
 																							Let
-																								Ti9.185 : int
+																								Ti10.186 : int
 																								Let
-																									Ti8.186 : int
+																									Ti9.187 : int
 																									Let
-																										Ti7.187 : int
+																										Ti8.188 : int
 																										Int 2
-																										Sub n.177 Ti7.187
-																									App add.176 Ti8.186 
-																								Add Ti6.184 Ti9.185
+																										Sub n.178 Ti8.188
+																									App add.177 Ti9.187 
+																								Add Ti7.185 Ti10.186
 																						Let
-																							Ti12.182 : int
+																							Ti13.183 : int
 																							Let
-																								Tu11.183 : unit
+																								Tu12.184 : unit
 																								Unit
-																								ExtFunApp read_int Tu11.183 
-																							Add Ti10.181 Ti12.182
+																								ExtFunApp read_int Tu12.184 
+																							Add Ti11.182 Ti13.183
 																		Let
-																			Ti2.178 : int
+																			Ti2.179 : int
 																			Let
-																				Ti1.179 : int
-																				Int 7
-																				App add.176 Ti1.179 
-																			ExtFunApp print_int Ti2.178 
+																				Ti1.180 : int
+																				Int 10
+																				App add.177 Ti1.180 
+																			ExtFunApp print_int Ti2.179 
 
 
 <****** iter ******>
 LetRec
 	FunDef
-		add.176 : (int -> int)
-		n.177 : int
+		add.177 : (int -> int)
+		n.178 : int
 		Let
-			Ti3.180 : int
+			Ti3.181 : int
 			Int 2
-			IfLE n.177 Ti3.180
-				Int 1
+			IfLE n.178 Ti3.181
 				Let
-					Ti4.189 : int
+					Tu4.191 : unit
+					Unit
+					ExtFunApp read_int Tu4.191 
+				Let
+					Ti5.190 : int
 					Int 1
 					Let
-						Ti5.188 : int
-						Sub n.177 Ti4.189
+						Ti6.189 : int
+						Sub n.178 Ti5.190
 						Let
-							Ti6.184 : int
-							App add.176 Ti5.188 
+							Ti7.185 : int
+							App add.177 Ti6.189 
 							Let
-								Ti7.187 : int
+								Ti8.188 : int
 								Int 2
 								Let
-									Ti8.186 : int
-									Sub n.177 Ti7.187
+									Ti9.187 : int
+									Sub n.178 Ti8.188
 									Let
-										Ti9.185 : int
-										App add.176 Ti8.186 
+										Ti10.186 : int
+										App add.177 Ti9.187 
 										Let
-											Ti10.181 : int
-											Add Ti6.184 Ti9.185
+											Ti11.182 : int
+											Add Ti7.185 Ti10.186
 											Let
-												Tu11.183 : unit
+												Tu12.184 : unit
 												Unit
 												Let
-													Ti12.182 : int
-													ExtFunApp read_int Tu11.183 
-													Add Ti10.181 Ti12.182
+													Ti13.183 : int
+													ExtFunApp read_int Tu12.184 
+													Add Ti11.182 Ti13.183
 	Let
-		Ti1.179 : int
-		Int 7
+		Ti1.180 : int
+		Int 10
 		Let
-			Ti2.178 : int
-			App add.176 Ti1.179 
-			ExtFunApp print_int Ti2.178 
+			Ti2.179 : int
+			App add.177 Ti1.180 
+			ExtFunApp print_int Ti2.179 
 
 
 <****** Closure ******>
 Prog
 	FunDef
 		/* name */
-		Ladd.176 : (int -> int)
+		Ladd.177 : (int -> int)
 		/* args */
-		n.177 : int
+		n.178 : int
 		/* formal_fv */
 		/* body */
 		Let
-			Ti3.180 : int
+			Ti3.181 : int
 			Int 2
-			IfLE n.177 Ti3.180
-				Int 1
+			IfLE n.178 Ti3.181
 				Let
-					Ti4.189 : int
+					Tu4.191 : unit
+					Unit
+					AppDir Lmin_caml_read_int Tu4.191 
+				Let
+					Ti5.190 : int
 					Int 1
 					Let
-						Ti5.188 : int
-						Sub n.177 Ti4.189
+						Ti6.189 : int
+						Sub n.178 Ti5.190
 						Let
-							Ti6.184 : int
-							AppDir Ladd.176 Ti5.188 
+							Ti7.185 : int
+							AppDir Ladd.177 Ti6.189 
 							Let
-								Ti7.187 : int
+								Ti8.188 : int
 								Int 2
 								Let
-									Ti8.186 : int
-									Sub n.177 Ti7.187
+									Ti9.187 : int
+									Sub n.178 Ti8.188
 									Let
-										Ti9.185 : int
-										AppDir Ladd.176 Ti8.186 
+										Ti10.186 : int
+										AppDir Ladd.177 Ti9.187 
 										Let
-											Ti10.181 : int
-											Add Ti6.184 Ti9.185
+											Ti11.182 : int
+											Add Ti7.185 Ti10.186
 											Let
-												Tu11.183 : unit
+												Tu12.184 : unit
 												Unit
 												Let
-													Ti12.182 : int
-													AppDir Lmin_caml_read_int Tu11.183 
-													Add Ti10.181 Ti12.182
+													Ti13.183 : int
+													AppDir Lmin_caml_read_int Tu12.184 
+													Add Ti11.182 Ti13.183
 	Let
-		Ti1.179 : int
-		Int 7
+		Ti1.180 : int
+		Int 10
 		Let
-			Ti2.178 : int
-			AppDir Ladd.176 Ti1.179 
-			AppDir Lmin_caml_print_int Ti2.178 
+			Ti2.179 : int
+			AppDir Ladd.177 Ti1.180 
+			AppDir Lmin_caml_print_int Ti2.179 
 
 
 <****** Virtual ******>
 Prog
 	FunDef
-		Ladd.176
+		Ladd.177
 		/* args */
-		n.177
+		n.178
 		/* fargs */
 		Let
-			Ti3.180 : int
+			Ti3.181 : int
 			Set 2
 			Ans
-				IfLE n.177 (V Ti3.180)
-					Ans
-						Set 1
+				IfLE n.178 (V Ti3.181)
 					Let
-						Ti4.189 : int
+						Tu4.191 : unit
+						Nop
+						Ans
+							CallDir
+								Lmin_caml_read_int
+								
+								
+					Let
+						Ti5.190 : int
 						Set 1
 						Let
-							Ti5.188 : int
-							Sub n.177 (V Ti4.189)
+							Ti6.189 : int
+							Sub n.178 (V Ti5.190)
 							Let
-								Ti6.184 : int
+								Ti7.185 : int
 								CallDir
-									Ladd.176
-									Ti5.188 
+									Ladd.177
+									Ti6.189 
 									
 								Let
-									Ti7.187 : int
+									Ti8.188 : int
 									Set 2
 									Let
-										Ti8.186 : int
-										Sub n.177 (V Ti7.187)
+										Ti9.187 : int
+										Sub n.178 (V Ti8.188)
 										Let
-											Ti9.185 : int
+											Ti10.186 : int
 											CallDir
-												Ladd.176
-												Ti8.186 
+												Ladd.177
+												Ti9.187 
 												
 											Let
-												Ti10.181 : int
-												Add Ti6.184 (V Ti9.185)
+												Ti11.182 : int
+												Add Ti7.185 (V Ti10.186)
 												Let
-													Tu11.183 : unit
+													Tu12.184 : unit
 													Nop
 													Let
-														Ti12.182 : int
+														Ti13.183 : int
 														CallDir
 															Lmin_caml_read_int
 															
 															
 														Ans
-															Add Ti10.181 (V Ti12.182)
+															Add Ti11.182 (V Ti13.183)
 		int
 	Let
-		Ti1.179 : int
-		Set 7
+		Ti1.180 : int
+		Set 10
 		Let
-			Ti2.178 : int
+			Ti2.179 : int
 			CallDir
-				Ladd.176
-				Ti1.179 
+				Ladd.177
+				Ti1.180 
 				
 			Ans
 				CallDir
 					Lmin_caml_print_int
-					Ti2.178 
+					Ti2.179 
 					
 
 
 <****** Simm ******>
 Prog
 	FunDef
-		Ladd.176
+		Ladd.177
 		/* args */
-		n.177
+		n.178
 		/* fargs */
 		Ans
-			IfLE n.177 (C 2)
-				Ans
-					Set 1
+			IfLE n.178 (C 2)
 				Let
-					Ti5.188 : int
-					Sub n.177 (C 1)
-					Let
-						Ti6.184 : int
+					Tu4.191 : unit
+					Nop
+					Ans
 						CallDir
-							Ladd.176
-							Ti5.188 
+							Lmin_caml_read_int
+							
+							
+				Let
+					Ti6.189 : int
+					Sub n.178 (C 1)
+					Let
+						Ti7.185 : int
+						CallDir
+							Ladd.177
+							Ti6.189 
 							
 						Let
-							Ti8.186 : int
-							Sub n.177 (C 2)
+							Ti9.187 : int
+							Sub n.178 (C 2)
 							Let
-								Ti9.185 : int
+								Ti10.186 : int
 								CallDir
-									Ladd.176
-									Ti8.186 
+									Ladd.177
+									Ti9.187 
 									
 								Let
-									Ti10.181 : int
-									Add Ti6.184 (V Ti9.185)
+									Ti11.182 : int
+									Add Ti7.185 (V Ti10.186)
 									Let
-										Tu11.183 : unit
+										Tu12.184 : unit
 										Nop
 										Let
-											Ti12.182 : int
+											Ti13.183 : int
 											CallDir
 												Lmin_caml_read_int
 												
 												
 											Ans
-												Add Ti10.181 (V Ti12.182)
+												Add Ti11.182 (V Ti13.183)
 		int
 	Let
-		Ti1.179 : int
-		Set 7
+		Ti1.180 : int
+		Set 10
 		Let
-			Ti2.178 : int
+			Ti2.179 : int
 			CallDir
-				Ladd.176
-				Ti1.179 
+				Ladd.177
+				Ti1.180 
 				
 			Ans
 				CallDir
 					Lmin_caml_print_int
-					Ti2.178 
+					Ti2.179 
 					
 
 
 <****** RegAlloc ******>
 Prog
 	FunDef
-		Ladd.176
+		Ladd.177
 		/* args */
 		$2
 		/* fargs */
 		Ans
 			IfLE $2 (C 2)
-				Ans
-					Set 1
+				Let
+					%g0 : unit
+					Nop
+					Ans
+						CallDir
+							Lmin_caml_read_int
+							
+							
 				Let
 					$3 : int
 					Sub $2 (C 1)
 					Let
-						Tu323 : unit
-						Save $2 n.177
+						Tu325 : unit
+						Save $2 n.178
 						Let
 							$2 : int
 							CallDir
-								Ladd.176
+								Ladd.177
 								$3 
 								
 							Let
 								$3 : int
-								Restore n.177
+								Restore n.178
 								Let
 									$3 : int
 									Sub $3 (C 2)
 									Let
-										Tu324 : unit
-										Save $2 Ti6.184
+										Tu326 : unit
+										Save $2 Ti7.185
 										Let
 											$2 : int
 											CallDir
-												Ladd.176
+												Ladd.177
 												$3 
 												
 											Let
 												$3 : int
-												Restore Ti6.184
+												Restore Ti7.185
 												Let
 													$2 : int
 													Add $3 (V $2)
@@ -2447,8 +2483,8 @@ Prog
 														%g0 : unit
 														Nop
 														Let
-															Tu325 : unit
-															Save $2 Ti10.181
+															Tu327 : unit
+															Save $2 Ti11.182
 															Let
 																$2 : int
 																CallDir
@@ -2457,17 +2493,17 @@ Prog
 																	
 																Let
 																	$3 : int
-																	Restore Ti10.181
+																	Restore Ti11.182
 																	Ans
 																		Add $3 (V $2)
 		int
 	Let
 		$2 : int
-		Set 7
+		Set 10
 		Let
 			$2 : int
 			CallDir
-				Ladd.176
+				Ladd.177
 				$2 
 				
 			Ans

@@ -17,10 +17,8 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	output wire jump,
 	output wire [1:0] rw,
 	output wire is_jr,
-	output wire is_out,
 	output wire stop,
-	output wire [4:0] rd,
-	output wire is_in);
+	output wire [4:0] rd);
 
 
 	localparam OP_SPECIAL = 6'b000000;
@@ -120,7 +118,6 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 
 	assign is_jr  = (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_JR);
 
-	assign is_out = (inst[31:26] == OP_OUT);
 	assign stop = (inst[31:26] == OP_SPECIAL && inst[5:0] == OP_NOOP);
 
 
@@ -132,7 +129,6 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 				: inst[31:26] == OP_FPU ? inst[10:6]
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
-	assign is_in = inst[31:26] == OP_IN;
 	
 	always @(posedge clk) begin
 		if(rwin == 2'b01) begin

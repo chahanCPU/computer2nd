@@ -14,11 +14,14 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	input wire branch,
 	input wire jump,
 	input wire is_jr,
-	input wire is_in,
-	input wire [3:0] latancy,
+	input wire start,
+	input wire [2:0] mode,
 	output logic [31:0] d,
 	output wire [31:0] npc,
-	output wire in_valid);
+	output logic uart_state, //if on, busy
+	output wire aa_recieved,
+	output logic aa_sent
+);
 
 
 	localparam OP_LW = 6'b100011;
@@ -88,10 +91,11 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
 
-	logic in_ready;
 
 
     uart_rx #(CLK_PER_HALF_BIT) rx(rdata, rx_ready, ferr, rxd, clk, rstn);
+
+	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
 	parameter TX_SIZE = 12;
 	logic [8:0] txbuffer[TX_SIZE**2-1:0];
@@ -104,7 +108,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	wire 			 tx_busy;
 
 
-   uart_tx #(CLK_PER_HALF_BIT) tx(txbuffer[txbot], tx_start, tx_busy, txd, clk, rstn);
+	uart_tx #(CLK_PER_HALF_BIT) tx(txbuffer[txbot], tx_start, tx_busy, txd, clk, rstn);
+
+
 	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S));
 	assign addra = s + imm;
 	assign h = imm[10:6];
@@ -123,7 +129,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 		.douta (douta)
 	);
 
-	assign in_valid = (op_type != 2'b00 || instr != OP_IN || in_ready == 1);
 
 	logic [31:0] fpu_add_out;
 	logic fpu_add_ovf;
@@ -158,22 +163,35 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	always @(posedge clk) begin
 		if(~rstn) begin
 			d <= 0;
-			rxbot <= 1;
+			rxbot <= 0;
 			rxtop <= 0;
-			in_ready <= 0;
+			uart_state <= 0;
 
 			txbot <= 0;
 			txtop <= 0;
 			txwait <= 0;
+			aa_sent <= 0;
 		end
 		else begin
 
-			if(rx_ready) begin
+			if(mode == 1) begin // for LOAD
+				if(aa_sent == 0) begin
+					if(txtop == 0) begin
+						txbuffer[txtop] <= 8'b10101010;
+						txtop <= txtop + 1;
+					end
+					else begin
+						if(~tx_busy) begin
+							aa_sent <= 1;
+						end
+					end
+				end
+			end
+
+			//for EXEC
+			if(mode == 2 && rx_ready) begin
 				rxbuffer[rxtop] <= {24'b0, rdata};
 				rxtop <= rxtop + 1;
-			end
-			if(is_in) begin
-				rxbot <= rxbot + 1;
 			end
 
 
@@ -236,19 +254,13 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 			else if (op_type == 2'b10) begin
 				case (instr)
 					FPU_ADD : begin
-						if(latancy == 2) begin
-							d <= fpu_add_out;
-						end
+						d <= fpu_add_out;
 					end
 					FPU_SUB : begin
-						if(latancy == 2) begin
-							d <= fpu_sub_out;
-						end
+						d <= fpu_sub_out;
 					end
 					FPU_MUL : begin
-						if(latancy == 2) begin
-							d <= fpu_mul_out;
-						end
+						d <= fpu_mul_out;
 					end
 					FPU_INV : begin
 						d <= fpu_inv_out;
@@ -261,9 +273,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 					end
 			
 					FPU_SQRT : begin
-						if(latancy == 4) begin
-							d <= fpu_sqrt_out;
-						end
+						d <= fpu_sqrt_out;
 					end
 					FPU_EQ : begin
 						d <= fpu_eq_out;
@@ -326,18 +336,30 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 						d <= s;
 					end
 					OP_IN: begin
-						if(in_ready == 0) begin
-							if(rxbot != rxtop) begin
-								d <= rxbuffer[rxbot];
-								in_ready <= 1;
+						if(uart_state == 0) begin
+							if(start == 1) begin
+								uart_state <= 1;
 							end
 						end
-
-						else in_ready <= 0;
+						else begin
+							if(rxbot != rxtop) begin
+								d <= rxbuffer[rxbot];
+								rxbot <= rxbot + 1;
+								uart_state <= 0;
+							end
+						end
 					end
 					OP_OUT: begin
-						txbuffer[txtop] <= s[7:0];
-						txtop <= txtop + 1;
+						if(uart_state == 0) begin
+							if(start == 1) begin
+								uart_state <= 1;
+							end
+						end
+						else begin
+							txbuffer[txtop] <= s[7:0];
+							txtop <= txtop + 1;
+							uart_state <= 0;
+						end
 					end
 
 				endcase
