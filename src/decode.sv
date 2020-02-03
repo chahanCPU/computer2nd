@@ -77,6 +77,21 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	localparam FPU_FTOI = 6'b001000;
 	localparam FPU_ITOF = 6'b001001;
 
+	logic [31:0] tmp_s;
+	logic [31:0] tmp_t;
+	
+	forward _forward(
+		.s(tmp_s), 
+		.rs(rs), 
+		.t(tmp_t), 
+		.rt(rt), 
+		.d(dtowrite), 
+		.rw(rwin), 
+		.rd(rdin), 
+		.fs(s), 
+		.ft(t)
+	);
+
 	reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
 	reg [31:0][31:0] fpr = {32{32'b0}};
 
@@ -88,15 +103,15 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 					: inst[31:26] == OP_FPU ? 2'b10
 					: 2'b00;
 
-	assign s = (inst[31:26] == OP_JAL) ? pc + 4 : inst[31:26] == OP_FPU 
+	assign tmp_s = (inst[31:26] == OP_JAL) ? pc + 4 : inst[31:26] == OP_FPU 
 			? (inst[5:0] == FPU_ITOF ? gpr[inst[15:11]] : fpr[inst[15:11]])
 			: gpr[inst[25:21]];
 	
-	assign rs = inst[31:26] == OP_FPU ?
-		(inst[5:0] == FPU_ITOF ? {1'b0, inst[15:11]} : {1'b1, inst[15:11]})
-		: {1'b0, inst[25:11]};
+	assign rs = (inst[31:26] == OP_JAL) ? 6'b0 : inst[31:26] == OP_FPU
+		? (inst[5:0] == FPU_ITOF ? {1'b0, inst[15:11]} : {1'b1, inst[15:11]})
+		: {1'b0, inst[25:21]};
 
-	assign t = inst[31:26] == OP_SW_S ? fpr[inst[20:16]] :
+	assign tmp_t = inst[31:26] == OP_SW_S ? fpr[inst[20:16]] :
 		inst[31:26] == OP_FPU ? fpr[inst[20:16]] : gpr[inst[20:16]];
 
 	assign rt = inst[31:26] == OP_SW_S ? {1'b1, inst[20:16]} :

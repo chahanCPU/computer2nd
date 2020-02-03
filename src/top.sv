@@ -109,7 +109,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
 	// assign fd_update = !(mode == EXEC && pipe == FETCH && latancy == 0);
 	
-	assign fd_update = (mode == EXEC && pipe == FETCH && latancy == 0) ? 2'b01
+	assign fd_update = (mode == EXEC && pipe == FETCH) ? 2'b01
 		: 2'b00;
 
 	fdreg _fdreg(
@@ -146,7 +146,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.counter(d_counter)
 	);
 
-	assign de_update = (mode == EXEC && pipe == DECODE && latancy == 0) ? 2'b01
+	assign de_update = (mode == EXEC && pipe == DECODE) ? 2'b01
 		: 2'b00;
 
 	dereg _dereg(
@@ -206,7 +206,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.aa_sent(aa_sent)
 	);
 
-	assign ew_update = (mode == EXEC && pipe == WRITEREG && latancy == 0) ? 2'b01
+	assign ew_update = (mode == EXEC && pipe == FETCH) ? 2'b01
 		: 2'b10;
 
 	ewreg _ewreg(
@@ -264,15 +264,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 				else latancy <= latancy + 1;
 			end
 			else if(pipe == WRITEREG) begin
-				if(latancy == 0) begin
-					latancy <= latancy + 1;
-				end
-				else if (latancy == 1) begin
-					latancy <= 0;
-					if(de_stop) pipe <= STOP;
-					else pipe <= FETCH;
-				end
-				else latancy <= latancy + 1;
+				if(de_stop) pipe <= STOP;
+				else pipe <= FETCH;
 			end
 		end
 	 end
