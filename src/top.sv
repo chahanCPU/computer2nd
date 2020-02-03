@@ -38,7 +38,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [5:0] d_instr;
 	logic [1:0] d_op_type;
 	logic [31:0] d_s;
+	logic [5:0] d_rs;
 	logic [31:0] d_t;
+	logic [5:0] d_rt;
 	logic [31:0] d_imm;
 	logic d_branch;
 	logic d_jump;
@@ -46,6 +48,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic d_is_jr;
 	logic d_stop;
 	logic [4:0] d_rd;
+	logic [4:0] d_counter;
 
 	logic [1:0] de_update;
 
@@ -60,6 +63,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic de_is_jr;
 	logic de_stop;
 	logic [4:0] de_rd;
+	logic [4:0] de_counter;
 	logic [31:0] de_pc;
 
 
@@ -128,15 +132,18 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.rdin(ew_rd), 
 		.instr(d_instr),
 		.op_type(d_op_type), 
-		.s(d_s), 
+		.s(d_s),
+		.rs(d_rs),
 		.t(d_t), 
+		.rt(d_rt),
 		.imm(d_imm), 
 		.branch(d_branch), 
 		.jump(d_jump), 
 		.rw(d_rw), 
 		.is_jr(d_is_jr), 
 		.stop(d_stop),
-		.rd(d_rd)
+		.rd(d_rd),
+		.counter(d_counter)
 	);
 
 	assign de_update = (mode == EXEC && pipe == DECODE && latancy == 0) ? 2'b01
@@ -157,6 +164,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.d_is_jr(d_is_jr),
 		.d_stop(d_stop),
 		.d_rd(d_rd),
+		.d_counter(d_counter),
+
 		.d_pc(fd_pc),
 		.de_instr(de_instr),
 		.de_op_type(de_op_type),
@@ -169,6 +178,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.de_is_jr(de_is_jr),
 		.de_stop(de_stop),
 		.de_rd(de_rd),
+		.de_counter(de_counter),
 		.de_pc(de_pc)
 	);
 
@@ -233,19 +243,11 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		end
 		else begin
 			if(pipe == FETCH) begin
-				if(latancy == 0) begin
-					latancy <= 0;
-					pipe <= DECODE;
-				end
-				else latancy <= latancy + 1;
+				pipe <= DECODE;
 			end
 			else if(pipe == DECODE) begin
-				if(latancy == 0) begin
-					latancy <= 0;
-					e_start <= 1;
-					pipe <= EXECUTE;
-				end
-				else latancy <= latancy + 1;
+				e_start <= 1;
+				pipe <= EXECUTE;
 			end
 			else if(pipe == EXECUTE) begin
 				if(latancy == 0) begin

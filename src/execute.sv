@@ -1,5 +1,24 @@
 `timescale 1ns / 1ps
 
+module forward
+	(input wire [31:0] s,
+	input wire [5:0] rs,
+	input wire [31:0] t,
+	input wire [5:0] rt,
+	input wire [31:0] d,
+	input wire [1:0] rw,
+	input wire [4:0] rd,
+	input wire [31:0] fs,
+	input wire [31:0] ft
+);
+
+	assign fs =
+		(rw != 2'b0 && rw[1] == rs[5] && rd[4:0] == rs[4:0]) ? d : s;
+	assign ft = 
+		(rw != 2'b0 && rw[1] == rt[5] && rd[4:0] == rt[4:0]) ? d : t;
+
+endmodule
+
 module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, parameter BRAM_SIZE = 18)
 	(input wire clk,
 	input wire rstn,

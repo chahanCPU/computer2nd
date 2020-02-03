@@ -45,6 +45,7 @@ module dereg
 	input wire d_is_jr,
 	input wire d_stop,
 	input wire [4:0] d_rd,
+	input wire [4:0] d_counter,
 	input wire [31:0] d_pc,
 
 	output logic [5:0] de_instr,
@@ -58,6 +59,7 @@ module dereg
 	output logic de_is_jr,
 	output logic de_stop,
 	output logic [4:0] de_rd,
+	output logic [4:0] de_counter,
 	output logic [31:0] de_pc
 );
 
@@ -75,6 +77,7 @@ module dereg
 			de_stop <= 0;
 			de_rd <= 0;
 			de_pc <= 0;
+			de_counter <= 0;
 		end
 		else begin
 			if(update == 2'b01) begin
@@ -90,6 +93,7 @@ module dereg
 				de_stop <= d_stop;
 				de_rd <= d_rd;
 				de_pc <= d_pc;
+				de_counter <= d_counter;
 			end
 			else if(update == 2'b10) begin
 				de_instr <= 0;
@@ -104,6 +108,7 @@ module dereg
 				de_stop <= 0;
 				de_rd <= 0;
 				de_pc <= 0;
+				de_counter <= 0;
 			end
 		end
 	end

@@ -11,14 +11,18 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	output wire [5:0] instr,
 	output wire [1:0] op_type,
 	output wire [31:0] s,
+	output wire [5:0] rs,
 	output wire [31:0] t,
+	output wire [5:0] rt,
 	output wire [31:0] imm,
 	output wire branch,
 	output wire jump,
 	output wire [1:0] rw,
 	output wire is_jr,
 	output wire stop,
-	output wire [4:0] rd);
+	output wire [4:0] rd,
+	output wire [4:0] counter
+);
 
 
 	localparam OP_SPECIAL = 6'b000000;
@@ -87,9 +91,16 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	assign s = (inst[31:26] == OP_JAL) ? pc + 4 : inst[31:26] == OP_FPU 
 			? (inst[5:0] == FPU_ITOF ? gpr[inst[15:11]] : fpr[inst[15:11]])
 			: gpr[inst[25:21]];
+	
+	assign rs = inst[31:26] == OP_FPU ?
+		(inst[5:0] == FPU_ITOF ? {1'b0, inst[15:11]} : {1'b1, inst[15:11]})
+		: {1'b0, inst[25:11]};
 
 	assign t = inst[31:26] == OP_SW_S ? fpr[inst[20:16]] :
 		inst[31:26] == OP_FPU ? fpr[inst[20:16]] : gpr[inst[20:16]];
+
+	assign rt = inst[31:26] == OP_SW_S ? {1'b1, inst[20:16]} :
+		inst[31:26] == OP_FPU ? {1'b1, inst[20:16]} : {1'b0, inst[20:16]};
 
 	assign imm = inst[31:26] == OP_J ? {6'b0, inst[25:0]}
 				: inst[31:26] == OP_JAL ? {6'b0, inst[25:0]}
@@ -129,6 +140,8 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 				: inst[31:26] == OP_FPU ? inst[10:6]
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
+	assign counter = (inst[31:26] == OP_OUT || inst[31:26] == OP_IN) ? 5'b10000 :
+		5'b00110;
 	
 	always @(posedge clk) begin
 		if(rwin == 2'b01) begin
