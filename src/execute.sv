@@ -18,7 +18,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	input wire [2:0] mode,
 	output logic [31:0] d,
 	output wire [31:0] npc,
-	output logic uart_state, //if on, busy
+	output wire uart_state, //if on, busy
 	output wire aa_recieved,
 	output logic aa_sent
 );
@@ -90,6 +90,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
+
+	logic uart_state_reg;
+	assign uart_state = (uart_state_reg || start);
 
 
 
@@ -165,12 +168,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 			d <= 0;
 			rxbot <= 0;
 			rxtop <= 0;
-			uart_state <= 0;
 
 			txbot <= 0;
 			txtop <= 0;
 			txwait <= 0;
 			aa_sent <= 0;
+			uart_state_reg <= 0;
 		end
 		else begin
 
@@ -336,29 +339,29 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 						d <= s;
 					end
 					OP_IN: begin
-						if(uart_state == 0) begin
+						if(uart_state_reg == 0) begin
 							if(start == 1) begin
-								uart_state <= 1;
+								uart_state_reg <= 1;
 							end
 						end
 						else begin
 							if(rxbot != rxtop) begin
 								d <= rxbuffer[rxbot];
 								rxbot <= rxbot + 1;
-								uart_state <= 0;
+								uart_state_reg <= 0;
 							end
 						end
 					end
 					OP_OUT: begin
-						if(uart_state == 0) begin
+						if(uart_state_reg == 0) begin
 							if(start == 1) begin
-								uart_state <= 1;
+								uart_state_reg <= 1;
 							end
 						end
 						else begin
 							txbuffer[txtop] <= s[7:0];
 							txtop <= txtop + 1;
-							uart_state <= 0;
+							uart_state_reg <= 0;
 						end
 					end
 
