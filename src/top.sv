@@ -48,6 +48,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic d_is_jr;
 	logic d_stop;
 	logic [4:0] d_rd;
+	logic [31:0] d_npc;
 	logic [4:0] d_counter;
 
 	logic [1:0] de_update;
@@ -143,6 +144,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.is_jr(d_is_jr), 
 		.stop(d_stop),
 		.rd(d_rd),
+		.npc(d_npc),
 		.counter(d_counter)
 	);
 
@@ -247,6 +249,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 			end
 			else if(pipe == DECODE) begin
 				e_start <= 1;
+				pc <= d_npc;
 				pipe <= EXECUTE;
 			end
 			else if(pipe == EXECUTE) begin
@@ -255,7 +258,6 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 				end
 				if(latancy == 5) begin
 					if(e_uart_state == 0) begin
-						pc <= e_npc;
 
 						latancy <= 0;
 						pipe <= WRITEREG;

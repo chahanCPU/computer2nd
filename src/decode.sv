@@ -21,6 +21,7 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	output wire is_jr,
 	output wire stop,
 	output wire [4:0] rd,
+	output wire [31:0] npc,
 	output wire [4:0] counter
 );
 
@@ -79,6 +80,7 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 
 	logic [31:0] tmp_s;
 	logic [31:0] tmp_t;
+	logic [31:0] bpc;
 	
 	forward _forward(
 		.s(tmp_s), 
@@ -157,6 +159,15 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 				: inst[15:11];
 	assign counter = (inst[31:26] == OP_OUT || inst[31:26] == OP_IN) ? 5'b10000 :
 		5'b00110;
+
+	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
+	assign npc = is_jr ? s
+				: jump ? bpc
+				: (inst[31:26] == OP_BEQ && s == t) ? bpc
+				: (inst[31:26] == OP_BGTZ && s > 0) ? bpc
+				: (inst[31:26] == OP_BLEZ && s <= 0) ? bpc
+				: (inst[31:26] == OP_BNE && s != t) ? bpc
+				: pc + 4;
 	
 	always @(posedge clk) begin
 		if(rwin == 2'b01) begin
