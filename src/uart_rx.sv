@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+
 module uart_rx #(CLK_PER_HALF_BIT = 5208) (
                output logic [7:0] rdata,
                output logic       rdata_ready,
