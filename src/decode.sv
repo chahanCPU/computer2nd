@@ -48,6 +48,8 @@ module decode
 		.fs(s), 
 		.ft(t)
 	);
+	logic do_nothing;
+	assign do_nothing = op_type == 2'b01 && inst[5:0] == 6'b1;
 
 	reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
 	reg [31:0][31:0] fpr = {32{32'b0}};
@@ -93,7 +95,7 @@ module decode
 						|| inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
 						|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE
 						|| inst[31:26] == OP_OUT || inst[31:26] == OP_J
-						|| is_jr) ? 2'b00
+						|| is_jr || do_nothing) ? 2'b00
 					: (inst[31:26] == OP_FPU && (inst[5:0] == FPU_FTOI || inst[5:0] == FPU_EQ
 					|| inst[5:0] == FPU_LT || inst[5:0] == FPU_LE)) ? 2'b01
 					: (inst[31:26] == OP_FPU || inst[31:26] == OP_LW_S) ? 2'b10
@@ -132,7 +134,7 @@ module decode
 	assign hazard =
 		(is_jr || inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
 		|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE) &&
-			(de_op_type != 2'b01 || de_instr != 6'b0);
+			(de_op_type != 2'b01 || de_instr != 6'b1);
 	
 	always @(posedge clk) begin
 		if(rwin == 2'b01) begin

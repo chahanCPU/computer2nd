@@ -58,7 +58,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic uart_state_reg;
 
 	assign uart_state = 
-		(start && op_type == 2'b0 && (instr == OP_OUT || instr == OP_IN)) 
+		(start && op_type == 2'b00 && (instr == OP_OUT || instr == OP_IN)) 
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;

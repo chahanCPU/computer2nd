@@ -31,8 +31,8 @@ module fdreg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
-			fd_pc <= 0;
-			fd_inst <= 0;
+			fd_pc <= 32'hfffffffc;
+			fd_inst <= 1;
 		end
 		else begin
 			if(update == 2'b01) begin
@@ -40,8 +40,8 @@ module fdreg
 				fd_inst <= f_inst;
 			end
 			else if(update == 2'b10) begin
-				fd_pc <= 0;
-				fd_inst <= 0;
+				fd_pc <= 32'hfffffffc;
+				fd_inst <= 1;
 			end
 		end
 	end
@@ -88,8 +88,8 @@ module dereg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
-			de_instr <= 0;
-			de_op_type <= 1;
+			de_instr <= 1;
+			de_op_type <= 2'b01;
 			de_s <= 0;
 			de_rs <= 0;
 			de_t <= 0;
@@ -123,8 +123,8 @@ module dereg
 				de_wait_time <= d_wait_time;
 			end
 			else if(update == 2'b10) begin
-				de_instr <= 0;
-				de_op_type <= 1;
+				de_instr <= 1;
+				de_op_type <= 2'b01;
 				de_s <= 0;
 				de_rs <= 0;
 				de_t <= 0;

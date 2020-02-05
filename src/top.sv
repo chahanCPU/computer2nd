@@ -15,16 +15,17 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	// localparam INST_SIZE = 15;
 	// localparam BRAM_SIZE = 19;
 
-	localparam FETCH = 0;
-	localparam DECODE = 1;
-	localparam EXECUTE = 2;
-	localparam WRITEREG = 3;
-	localparam STOP = 4;
+	// localparam FETCH = 0;
+	// localparam DECODE = 1;
+	// localparam EXECUTE = 2;
+	// localparam WRITEREG = 3;
+	// localparam STOP = 4;
 
 
 	localparam STALL = 0;
 	localparam LOAD = 1;
 	localparam EXEC = 2;
+	localparam STOP = 3;
 
 	logic [31:0] pc;
 	logic [31:0] f_inst;
@@ -105,23 +106,25 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	fetch #(CLK_PER_HALF_BIT) _fetch(
 		.clk(clk), 
 		.mode(mode), 
-		.pc(pc), 
+		.pc(d_npc), 
 		.rstn(rstn), 
 		.inst(f_inst), 
 		.done(load_done)
 	);
 
-	// assign fd_update = !(mode == EXEC && pipe == FETCH && latancy == 0);
-	
-	assign fd_update = (mode == EXEC && pipe == FETCH) ? 2'b01
-		: 2'b00;
+	wire execute_done = (latancy == de_wait_time && e_uart_state == 0);
+
+	assign fd_update = mode == EXEC ?
+		execute_done ? d_hazard ? 2'b00 : 2'b01 : 2'b00
+		: 2'b10;
 
 	fdreg _fdreg(
 		.clk(clk),
 		.rstn(rstn),
 		.update(fd_update),
-		.f_pc(pc),
+		.f_pc(d_npc),
 		.f_inst(f_inst),
+
 		.fd_pc(fd_pc),
 		.fd_inst(fd_inst)
 	);
@@ -154,8 +157,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.hazard(d_hazard)
 	);
 
-	assign de_update = (mode == EXEC && pipe == DECODE) ? 2'b01
-		: 2'b00;
+	assign de_update = mode == EXEC ?  
+		execute_done ? d_hazard ? 2'b10 : 2'b01 : 2'b00
+		: 2'b10;
 
 	dereg _dereg(
 		.clk(clk),
@@ -175,8 +179,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.d_stop(d_stop),
 		.d_rd(d_rd),
 		.d_wait_time(d_wait_time),
-
 		.d_pc(fd_pc),
+
 		.de_instr(de_instr),
 		.de_op_type(de_op_type),
 		.de_s(de_s),
@@ -223,7 +227,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.aa_sent(aa_sent)
 	);
 
-	assign ew_update = (mode == EXEC && pipe == FETCH) ? 2'b01
+	assign ew_update = mode == EXEC ?
+		execute_done ? 2'b01 : 2'b00
 		: 2'b10;
 
 	ewreg _ewreg(
@@ -233,6 +238,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.e_d(e_d),
 		.e_rw(de_rw),
 		.e_rd(de_rd),
+
 		.ew_d(ew_d),
 		.ew_rw(ew_rw),
 		.ew_rd(ew_rd)
@@ -243,7 +249,6 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		 pc <= 0;
 		 latancy <= 0;
 		 mode <= STALL;
-		 pipe <= FETCH;
 		 stage <= 0;
 		 e_start <= 0;
 	end 
@@ -259,32 +264,40 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 			end
 		end
 		else begin
-			if(pipe == FETCH) begin
-				pipe <= DECODE;
+			if(de_stop) mode <= STOP;
+			if(execute_done) begin
+				latancy <= 0;
 			end
-			else if(pipe == DECODE) begin
-				e_start <= 1;
-				pc <= d_npc;
-				pipe <= EXECUTE;
+			if(latancy < de_wait_time) begin
+				latancy <= latancy + 1;
 			end
-			else if(pipe == EXECUTE) begin
-				if(latancy == 0) begin
-					e_start <= 0;
-				end
-				if(latancy == de_wait_time) begin
-					if(e_uart_state == 0) begin
-						latancy <= 0;
-						pipe <= WRITEREG;
-					end
-				end
-				else if(latancy < de_wait_time) begin
-					latancy <= latancy + 1;
-				end
-			end
-			else if(pipe == WRITEREG) begin
-				if(de_stop) pipe <= STOP;
-				else pipe <= FETCH;
-			end
+			e_start <= execute_done;
+			// if(pipe == FETCH) begin
+			// 	pipe <= DECODE;
+			// end
+			// else if(pipe == DECODE) begin
+			// 	e_start <= 1;
+			// 	pc <= d_npc;
+			// 	pipe <= EXECUTE;
+			// end
+			// else if(pipe == EXECUTE) begin
+			// 	if(latancy == 0) begin
+			// 		e_start <= 0;
+			// 	end
+			// 	if(latancy == de_wait_time) begin
+			// 		if(e_uart_state == 0) begin
+			// 			latancy <= 0;
+			// 			pipe <= WRITEREG;
+			// 		end
+			// 	end
+			// 	else if(latancy < de_wait_time) begin
+			// 		latancy <= latancy + 1;
+			// 	end
+			// end
+			// else if(pipe == WRITEREG) begin
+			// 	if(de_stop) pipe <= STOP;
+			// 	else pipe <= FETCH;
+			// end
 		end
 	 end
    end
