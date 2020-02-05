@@ -49,7 +49,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic d_stop;
 	logic [4:0] d_rd;
 	logic [31:0] d_npc;
-	logic [4:0] d_counter;
+	logic [4:0] d_wait_time;
 
 	logic [1:0] de_update;
 
@@ -64,7 +64,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic de_is_jr;
 	logic de_stop;
 	logic [4:0] de_rd;
-	logic [4:0] de_counter;
+	logic [4:0] de_wait_time;
 	logic [31:0] de_pc;
 
 
@@ -86,7 +86,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] inst;
 	assign led = pc[7:0] | (mode << 4);
 
-	logic [3:0] latancy;
+	logic [4:0] latancy;
 	logic [2:0] stage;
 	logic load_done;
 
@@ -145,7 +145,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.stop(d_stop),
 		.rd(d_rd),
 		.npc(d_npc),
-		.counter(d_counter)
+		.wait_time(d_wait_time)
 	);
 
 	assign de_update = (mode == EXEC && pipe == DECODE) ? 2'b01
@@ -166,7 +166,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.d_is_jr(d_is_jr),
 		.d_stop(d_stop),
 		.d_rd(d_rd),
-		.d_counter(d_counter),
+		.d_wait_time(d_wait_time),
 
 		.d_pc(fd_pc),
 		.de_instr(de_instr),
@@ -180,7 +180,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.de_is_jr(de_is_jr),
 		.de_stop(de_stop),
 		.de_rd(de_rd),
-		.de_counter(de_counter),
+		.de_wait_time(de_wait_time),
 		.de_pc(de_pc)
 	);
 
@@ -256,14 +256,15 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 				if(latancy == 0) begin
 					e_start <= 0;
 				end
-				if(latancy == 5) begin
+				if(latancy == de_wait_time) begin
 					if(e_uart_state == 0) begin
-
 						latancy <= 0;
 						pipe <= WRITEREG;
 					end
 				end
-				else latancy <= latancy + 1;
+				else if(latancy < de_wait_time) begin
+					latancy <= latancy + 1;
+				end
 			end
 			else if(pipe == WRITEREG) begin
 				if(de_stop) pipe <= STOP;

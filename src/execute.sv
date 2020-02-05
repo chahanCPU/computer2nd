@@ -87,9 +87,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 
 	logic uart_state_reg;
 	assign uart_state = 
-		(start && op_type == 2'b0 &&
-			(instr == OP_OUT || instr == OP_IN)) ||
-		uart_state_reg;
+		(start && op_type == 2'b0 && (instr == OP_OUT || instr == OP_IN)) 
+		|| uart_state_reg;
 
 	localparam RX_SIZE = 14;
 	logic [31:0] rxbuffer[(2**RX_SIZE)-1:0];

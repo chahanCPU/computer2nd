@@ -22,7 +22,7 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 	output wire stop,
 	output wire [4:0] rd,
 	output wire [31:0] npc,
-	output wire [4:0] counter
+	output wire [4:0] wait_time
 );
 
 
@@ -157,8 +157,13 @@ module decode #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, par
 				: inst[31:26] == OP_FPU ? inst[10:6]
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
-	assign counter = (inst[31:26] == OP_OUT || inst[31:26] == OP_IN) ? 5'b10000 :
-		5'b00110;
+	assign wait_time = 
+		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00001
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00101
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00101
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b00101
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SQRT)  ? 5'b00101
+		: 5'b00000;
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
 	assign npc = is_jr ? s
