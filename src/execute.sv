@@ -16,7 +16,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	input wire is_jr,
 	input wire start,
 	input wire [2:0] mode,
-	output logic [31:0] d,
+	// output logic [31:0] d,
+	output wire [31:0] d,
 	output wire [31:0] npc,
 	output logic uart_state, //if on, busy
 	output wire aa_recieved,
@@ -74,7 +75,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	localparam FPU_ITOF = 6'b001001;
 
 
-
 	wire [7:0] 			 rdata;
     wire 			 rx_ready;
     wire 			 ferr;
@@ -86,6 +86,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	wire [31:0] bpc;
 
 	logic uart_state_reg;
+
 	assign uart_state = 
 		(start && op_type == 2'b0 && (instr == OP_OUT || instr == OP_IN)) 
 		|| uart_state_reg;
@@ -98,6 +99,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 
 
     uart_rx #(CLK_PER_HALF_BIT) rx(rdata, rx_ready, ferr, rxd, clk, rstn);
+	logic [7:0] op_in_out;
+	// assign op_in_out = rxbuffer[rxbot];
+
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
@@ -164,9 +168,51 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 	ftoi ftoio (s, fpu_ftoi_out);
 	itof itofo (s, fpu_itof_out);
 
+	// logic [31:0] tmp_d;
+	assign d = 
+		op_type == 2'b01 ?
+			instr == FUNC_ADD ? s + t
+			: instr == FUNC_SUB ? s - t
+			: instr == FUNC_MULT ? s * t
+			: instr == FUNC_DIV ? s / t
+			: instr == FUNC_AND ? s & t
+			: instr == FUNC_OR ? s | t
+			: instr == FUNC_XOR ? s ^ t
+			: instr == FUNC_SLT ? $signed(s) < $signed(t)
+			: instr == FUNC_SLL ? t << h
+			: instr == FUNC_SLLV ? t << s
+			: instr == FUNC_SRL ? t >> h
+			: instr == FUNC_SRLV ? t >> s
+			: 32'b0
+		: op_type == 2'b10 ?
+			instr == FPU_ADD ? fpu_add_out
+			: instr == FPU_SUB ? fpu_sub_out
+			: instr == FPU_MUL ? fpu_mul_out
+			: instr == FPU_INV ? fpu_inv_out
+			: instr == FPU_NEG ? s ^ (32'h80000000)
+			: instr == FPU_SQRT ? fpu_sqrt_out
+			: instr == FPU_EQ ? fpu_eq_out
+			: instr == FPU_LT ? fpu_lt_out
+			: instr == FPU_LE ? fpu_le_out
+			: instr == FPU_FTOI ? fpu_ftoi_out
+			: instr == FPU_ITOF ? fpu_itof_out
+			: 32'b0
+		: op_type == 2'b00 ? 
+			instr == OP_ADDI ? s + imm
+			: instr == OP_ANDI ? s & imm
+			: instr == OP_ORI ? s | imm
+			: instr == OP_XORI ? s ^ {16'b0, imm[15:0]}
+			: instr == OP_SLTI ? $signed(s) < $signed(imm)
+			: instr == OP_LUI ? (imm << 16)
+			: instr == OP_LW ? douta
+			: instr == OP_LW_S ? douta
+			: instr == OP_JAL ? s
+			: instr == OP_IN ? op_in_out
+			: 32'b0
+		: 32'b0;
+
 	always @(posedge clk) begin
 		if(~rstn) begin
-			d <= 0;
 			rxbot <= 0;
 			rxtop <= 0;
 			uart_state_reg <= 0;
@@ -175,9 +221,11 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 			txtop <= 0;
 			txwait <= 0;
 			aa_sent <= 0;
+			op_in_out <= 0;
 		end
 		else begin
 
+			//UART OPERATION
 			if(mode == 1) begin // for LOAD
 				if(aa_sent == 0) begin
 					if(txtop == 0) begin
@@ -211,162 +259,32 @@ module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, pa
 				end
 			end
 
-			if(op_type == 2'b1) begin
-				case(instr)
-					FUNC_ADD : begin
-						d <= s + t;
-					end
-					FUNC_SUB : begin
-						d <= s - t;
-					end
-					FUNC_MULT : begin
-						d <= s * t;
-					end
-					FUNC_DIV : begin
-						d <= s / t;
-					end
-					FUNC_AND : begin
-						d <= s & t;
-					end
-					FUNC_OR : begin
-						d <= s | t;
-					end
-					FUNC_XOR : begin
-						d <= s ^ t;
-					end
-					FUNC_SLT : begin
-						d <= $signed(s) < $signed(t);
-					end
-					FUNC_SLL : begin
-						d <= t << h;
-					end
-					FUNC_SLLV : begin
-						d <= t << s;
-					end
-					FUNC_SRL : begin
-						d <= t >> h;
-					end
-					FUNC_SRLV : begin
-						d <= t >> h;
-					end
-					FUNC_JR : begin
-						d <= s;
-					end
-				endcase
 
+			if(op_type == 2'b00 && instr == OP_IN) begin
+				if(uart_state_reg == 0) begin
+					if(start == 1) begin
+						uart_state_reg <= 1;
+					end
+				end
+				else begin
+					if(rxbot != rxtop) begin
+						op_in_out <= rxbuffer[rxbot];
+						rxbot <= rxbot + 1;
+						uart_state_reg <= 0;
+					end
+				end
 			end
-			else if (op_type == 2'b10) begin
-				case (instr)
-					FPU_ADD : begin
-						d <= fpu_add_out;
+			else if(op_type == 2'b00 && instr == OP_OUT) begin
+				if(uart_state_reg == 0) begin
+					if(start == 1) begin
+						uart_state_reg <= 1;
 					end
-					FPU_SUB : begin
-						d <= fpu_sub_out;
-					end
-					FPU_MUL : begin
-						d <= fpu_mul_out;
-					end
-					FPU_INV : begin
-						d <= fpu_inv_out;
-					end
-					// FPU_ABS : begin
-					// 	d <= fpu_abs_out;
-					// end
-					FPU_NEG : begin
-						d <= (s ^ 32'h80000000);
-					end
-			
-					FPU_SQRT : begin
-						d <= fpu_sqrt_out;
-					end
-					FPU_EQ : begin
-						d <= fpu_eq_out;
-					end
-					FPU_LT : begin
-						d <= fpu_lt_out;
-					end
-					FPU_LE : begin
-						d <= fpu_le_out;
-					end
-			
-					FPU_FTOI : begin
-						d <= fpu_ftoi_out;
-					end
-					
-					FPU_ITOF : begin
-						d <= fpu_itof_out;
-					end
-				endcase
-			end
-			else begin
-				case (instr)
-					OP_ADDI: begin
-						d <= s + imm;
-					end
-					OP_ANDI: begin
-						d <= s & imm;
-					end
-					OP_ORI: begin
-						d <= s | imm;
-					end
-					OP_XORI: begin
-						d <= s ^ {16'b0, imm[15:0]};
-					end
-					OP_SLTI: begin
-						d <= $signed(s) < $signed(imm);
-					end
-					OP_LUI: begin
-						d <= (imm << 16);
-					end
-					OP_BEQ: begin
-						d <= (s == t);
-					end
-					OP_BGTZ: begin
-						d <= (s > 0);
-					end
-					OP_BLEZ: begin
-						d <= (s <= 0);
-					end
-					OP_BNE: begin
-						d <= (s != t);
-					end
-					OP_LW: begin
-						d <= douta;
-					end
-					OP_LW_S: begin
-						d <= douta;
-					end
-					OP_JAL: begin
-						d <= s;
-					end
-					OP_IN: begin
-						if(uart_state_reg == 0) begin
-							if(start == 1) begin
-								uart_state_reg <= 1;
-							end
-						end
-						else begin
-							if(rxbot != rxtop) begin
-								d <= rxbuffer[rxbot];
-								rxbot <= rxbot + 1;
-								uart_state_reg <= 0;
-							end
-						end
-					end
-					OP_OUT: begin
-						if(uart_state_reg == 0) begin
-							if(start == 1) begin
-								uart_state_reg <= 1;
-							end
-						end
-						else begin
-							txbuffer[txtop] <= s[7:0];
-							txtop <= txtop + 1;
-							uart_state_reg <= 0;
-						end
-					end
-
-				endcase
+				end
+				else begin
+					txbuffer[txtop] <= s[7:0];
+					txtop <= txtop + 1;
+					uart_state_reg <= 0;
+				end
 			end
 		end
 	end
