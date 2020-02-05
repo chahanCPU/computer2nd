@@ -50,6 +50,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [4:0] d_rd;
 	logic [31:0] d_npc;
 	logic [4:0] d_wait_time;
+	logic d_hazard;
 
 	logic [1:0] de_update;
 
@@ -134,7 +135,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.dtowrite(ew_d), 
 		.rdin(ew_rd), 
 		.instr(d_instr),
+		.de_instr(de_instr),
 		.op_type(d_op_type), 
+		.de_op_type(de_op_type),
 		.s(d_s),
 		.rs(d_rs),
 		.t(d_t), 
@@ -147,7 +150,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.stop(d_stop),
 		.rd(d_rd),
 		.npc(d_npc),
-		.wait_time(d_wait_time)
+		.wait_time(d_wait_time),
+		.hazard(d_hazard)
 	);
 
 	assign de_update = (mode == EXEC && pipe == DECODE) ? 2'b01

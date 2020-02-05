@@ -11,7 +11,9 @@ module decode
 	input wire [31:0] dtowrite,
 	input wire [4:0] rdin,
 	output wire [5:0] instr,
+	input wire [5:0] de_instr,
 	output wire [1:0] op_type,
+	input wire [1:0] de_op_type,
 	output wire [31:0] s,
 	output wire [5:0] rs,
 	output wire [31:0] t,
@@ -24,7 +26,8 @@ module decode
 	output wire stop,
 	output wire [4:0] rd,
 	output wire [31:0] npc,
-	output wire [4:0] wait_time
+	output wire [4:0] wait_time,
+	output wire hazard
 );
 
 
@@ -125,6 +128,11 @@ module decode
 				: (inst[31:26] == OP_BLEZ && s <= 0) ? bpc
 				: (inst[31:26] == OP_BNE && s != t) ? bpc
 				: pc + 4;
+	
+	assign hazard =
+		(is_jr || inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
+		|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE) &&
+			(de_op_type != 2'b01 || de_instr != 6'b0);
 	
 	always @(posedge clk) begin
 		if(rwin == 2'b01) begin
