@@ -10,8 +10,13 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	input wire [31:0] pc,
 	input wire [5:0] instr,
 	input wire [1:0] op_type,
-	input wire [31:0] s,
-	input wire [31:0] t,
+	input wire [31:0] de_s,
+	input wire [31:0] de_rs,
+	input wire [31:0] de_t,
+	input wire [31:0] de_rt,
+	input wire [31:0] ew_d,
+	input wire [31:0] ew_rw,
+	input wire [31:0] ew_rd,
 	input wire [31:0] imm,
 	input wire branch,
 	input wire jump,
@@ -26,6 +31,19 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	output logic aa_sent
 );
 
+	wire [31:0] s;
+	wire [31:0] t;
+
+	forward _forward(
+		.s(de_s),
+		.rs(de_rs),
+		.t(de_t),
+		.rt(de_rt),
+		.d(ew_d),
+		.rw(ew_rw),
+		.rd(ew_rd),
+		.fs(s),
+		.ft(t));
 
 	wire [7:0] 			 rdata;
     wire 			 rx_ready;
@@ -120,7 +138,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	ftoi ftoio (s, fpu_ftoi_out);
 	itof itofo (s, fpu_itof_out);
 
-	// logic [31:0] tmp_d;
 	assign d = 
 		op_type == 2'b01 ?
 			instr == FUNC_ADD ? s + t

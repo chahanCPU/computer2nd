@@ -56,7 +56,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [5:0] de_instr;
 	logic [1:0] de_op_type;
 	logic [31:0] de_s;
+	logic [5:0] de_rs;
 	logic [31:0] de_t;
+	logic [5:0] de_rt;
 	logic [31:0] de_imm;
 	logic de_branch;
 	logic de_jump;
@@ -158,7 +160,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.d_instr(d_instr),
 		.d_op_type(d_op_type),
 		.d_s(d_s),
+		.d_rs(d_rs),
 		.d_t(d_t),
+		.d_rt(d_rt),
 		.d_imm(d_imm),
 		.d_branch(d_branch),
 		.d_jump(d_jump),
@@ -172,7 +176,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.de_instr(de_instr),
 		.de_op_type(de_op_type),
 		.de_s(de_s),
+		.de_rs(de_rs),
 		.de_t(de_t),
+		.de_rt(de_rt),
 		.de_imm(de_imm),
 		.de_branch(de_branch),
 		.de_jump(de_jump),
@@ -193,8 +199,13 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.pc(de_pc), 
 		.instr(de_instr),
 		.op_type(de_op_type), 
-		.s(de_s), 
-		.t(de_t), 
+		.de_s(de_s), 
+		.de_rs(de_rs), 
+		.de_t(de_t), 
+		.de_rt(de_rt), 
+		.ew_d(ew_d),
+		.ew_rw(ew_rw),
+		.ew_rd(ew_rd),
 		.imm(de_imm), 
 		.branch(de_branch), 
 		.jump(de_jump),

@@ -56,7 +56,9 @@ module dereg
 	input wire [5:0] d_instr,
 	input wire [1:0] d_op_type,
 	input wire [31:0] d_s,
+	input wire [5:0] d_rs,
 	input wire [31:0] d_t,
+	input wire [5:0] d_rt,
 	input wire [31:0] d_imm,
 	input wire d_branch,
 	input wire d_jump,
@@ -70,7 +72,9 @@ module dereg
 	output logic [5:0] de_instr,
 	output logic [1:0] de_op_type,
 	output logic [31:0] de_s,
+	output logic [5:0] de_rs,
 	output logic [31:0] de_t,
+	output logic [5:0] de_rt,
 	output logic [31:0] de_imm,
 	output logic de_branch,
 	output logic de_jump,
@@ -87,7 +91,9 @@ module dereg
 			de_instr <= 0;
 			de_op_type <= 1;
 			de_s <= 0;
+			de_rs <= 0;
 			de_t <= 0;
+			de_rt <= 0;
 			de_imm <= 0;
 			de_branch <= 0;
 			de_jump <= 0;
@@ -103,7 +109,9 @@ module dereg
 				de_instr <= d_instr;
 				de_op_type <= d_op_type;
 				de_s <= d_s;
+				de_rs <= d_rs;
 				de_t <= d_t;
+				de_rt <= d_rt;
 				de_imm <= d_imm;
 				de_branch <= d_branch;
 				de_jump <= d_jump;
@@ -118,7 +126,9 @@ module dereg
 				de_instr <= 0;
 				de_op_type <= 1;
 				de_s <= 0;
+				de_rs <= 0;
 				de_t <= 0;
+				de_rt <= 0;
 				de_imm <= 0;
 				de_branch <= 0;
 				de_jump <= 0;
