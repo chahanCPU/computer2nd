@@ -123,7 +123,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.fd_inst(fd_inst)
 	);
 
-	decode #(CLK_PER_HALF_BIT, INST_SIZE, BRAM_SIZE) _decode(
+	decode _decode(
 		.clk(clk), 
 		.rstn(rstn), 
 		.pc(fd_pc), 
@@ -185,7 +185,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	);
 
 
-	execute #(CLK_PER_HALF_BIT, INST_SIZE, BRAM_SIZE) _execute(
+	execute #(CLK_PER_HALF_BIT) _execute(
 		.clk(clk), 
 		.rstn(rstn),
 		.rxd(rxd), 

@@ -1,6 +1,8 @@
 `timescale 1ns / 1ps
 
-module execute #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10, parameter BRAM_SIZE = 18)
+import constant::*;
+
+module execute #( parameter CLK_PER_HALF_BIT = 434)
 	(input wire clk,
 	input wire rstn,
 	input wire rxd,
