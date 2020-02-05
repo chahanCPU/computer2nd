@@ -27,56 +27,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 );
 
 
-	localparam OP_LW = 6'b100011;
-	localparam OP_SW = 6'b101011;
-	localparam OP_ADDI = 6'b001000;
-	localparam OP_ANDI = 6'b001100;
-	localparam OP_ORI = 6'b001101;
-	localparam OP_XORI = 6'b001110;
-	localparam OP_SLTI = 6'b001010;
-	localparam OP_LUI = 6'b001111;
-	localparam OP_BEQ = 6'b000100;
-	localparam OP_BGTZ = 6'b000111;
-	localparam OP_BLEZ = 6'b000110;
-	localparam OP_BNE = 6'b000101;
-	localparam OP_J = 6'b000010;
-	localparam OP_JAL = 6'b000011;
-	localparam OP_IN = 6'b111110;
-	localparam OP_OUT = 6'b111111;
-
-	localparam OP_LUI_S = 6'b011111;
-	localparam OP_LW_S = 6'b110001;
-	localparam OP_SW_S = 6'b111001;
-
-
-	localparam FUNC_ADD = 6'b100000;
-	localparam FUNC_SUB = 6'b100010;
-	localparam FUNC_MULT = 6'b011000;
-	localparam FUNC_DIV = 6'b011010;
-	localparam FUNC_AND = 6'b100100;
-	localparam FUNC_OR  = 6'b100101;
-	localparam FUNC_XOR  = 6'b100110;
-	localparam FUNC_SLT  = 6'b101010;
-	localparam FUNC_SLL  = 6'b000000; //change!!!!
-	localparam FUNC_SLLV = 6'b000100;
-	localparam FUNC_SRL  = 6'b000010;
-	localparam FUNC_SRLV = 6'b000110;
-	localparam FUNC_JR = 6'b001000;
-
-	localparam FPU_ADD = 6'b000000;
-	localparam FPU_SUB = 6'b000001;
-	localparam FPU_MUL = 6'b000010;
-	localparam FPU_INV = 6'b000011;
-	localparam FPU_ABS = 6'b000101;
-	localparam FPU_NEG = 6'b000111;
-	localparam FPU_SQRT = 6'b000100;
-	localparam FPU_EQ = 6'b110010;
-	localparam FPU_LT = 6'b110100;
-	localparam FPU_LE = 6'b110110;
-	localparam FPU_FTOI = 6'b001000;
-	localparam FPU_ITOF = 6'b001001;
-
-
 	wire [7:0] 			 rdata;
     wire 			 rx_ready;
     wire 			 ferr;
@@ -93,7 +43,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		(start && op_type == 2'b0 && (instr == OP_OUT || instr == OP_IN)) 
 		|| uart_state_reg;
 
-	localparam RX_SIZE = 14;
+	localparam RX_SIZE = 11;
 	logic [31:0] rxbuffer[(2**RX_SIZE)-1:0];
 
 	logic [RX_SIZE-1:0] rxbot;
@@ -107,7 +57,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
-	parameter TX_SIZE = 12;
+	parameter TX_SIZE = 15;
 	logic [8:0] txbuffer[TX_SIZE**2-1:0];
 
 	logic [TX_SIZE-1:0] txbot;

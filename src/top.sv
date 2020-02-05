@@ -99,7 +99,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	wire aa_recieved;
 	wire aa_sent;
 
-	fetch #(CLK_PER_HALF_BIT, INST_SIZE) _fetch(
+	fetch #(CLK_PER_HALF_BIT) _fetch(
 		.clk(clk), 
 		.mode(mode), 
 		.pc(pc), 

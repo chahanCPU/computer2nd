@@ -1,6 +1,8 @@
 `timescale 1ns / 1ps
 
-module fetch #( parameter CLK_PER_HALF_BIT = 434, parameter INST_SIZE = 10)
+import constant::*;
+
+module fetch #( parameter CLK_PER_HALF_BIT = 434)
 	(input wire clk,
 	input wire mode,
 	input wire [31:0] pc,

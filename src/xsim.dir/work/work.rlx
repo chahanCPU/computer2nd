@@ -3,12 +3,12 @@
 Dec  6 2018
 23:39:36
 /home/omochan/3A/cpujikken/core2/src/ALU.sv,1580534274,systemVerilog,,,,ALU,,,,,,,,
-/home/omochan/3A/cpujikken/core2/src/constant.sv,1580868155,systemVerilog,/home/omochan/3A/cpujikken/core2/src/top.sv,,,constant,,,,,,,,
+/home/omochan/3A/cpujikken/core2/src/constant.sv,1580868593,systemVerilog,/home/omochan/3A/cpujikken/core2/src/top.sv,,,constant,,,,,,,,
 /home/omochan/3A/cpujikken/core2/src/decode.sv,1580868217,systemVerilog,,,,$unit_decode_sv;decode,,,,,,,,
-/home/omochan/3A/cpujikken/core2/src/execute.sv,1580867572,systemVerilog,,,,execute,,,,,,,,
-/home/omochan/3A/cpujikken/core2/src/fetch.sv,1580560922,systemVerilog,,,,fetch,,,,,,,,
+/home/omochan/3A/cpujikken/core2/src/execute.sv,1580868766,systemVerilog,,,,$unit_execute_sv;execute,,,,,,,,
+/home/omochan/3A/cpujikken/core2/src/fetch.sv,1580868488,systemVerilog,,,,$unit_fetch_sv;fetch,,,,,,,,
 /home/omochan/3A/cpujikken/core2/src/register.sv,1580861426,systemVerilog,,,,dereg;ewreg;fdreg;forward,,,,,,,,
 /home/omochan/3A/cpujikken/core2/src/test_cpu.sv,1580746879,systemVerilog,,,,test_cpu,,,,,,,,
-/home/omochan/3A/cpujikken/core2/src/top.sv,1580868228,systemVerilog,,,,$unit_top_sv;top,,,,,,,,
+/home/omochan/3A/cpujikken/core2/src/top.sv,1580868497,systemVerilog,,,,$unit_top_sv;top,,,,,,,,
 /home/omochan/3A/cpujikken/core2/src/top_wrapper.v,1580532786,verilog,,,,top_wrapper,,,,,,,,
 /home/omochan/3A/cpujikken/core2/src/writereg.sv,1580566580,systemVerilog,,,,writereg,,,,,,,,
