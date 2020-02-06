@@ -11,12 +11,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	input wire [5:0] instr,
 	input wire [1:0] op_type,
 	input wire [31:0] de_s,
-	input wire [31:0] de_rs,
+	input wire [5:0] de_rs,
 	input wire [31:0] de_t,
-	input wire [31:0] de_rt,
+	input wire [5:0] de_rt,
 	input wire [31:0] ew_d,
-	input wire [31:0] ew_rw,
-	input wire [31:0] ew_rd,
+	input wire [1:0] ew_rw,
+	input wire [4:0] ew_rd,
 	input wire [31:0] imm,
 	input wire branch,
 	input wire jump,
@@ -76,7 +76,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
 	parameter TX_SIZE = 15;
-	logic [8:0] txbuffer[TX_SIZE**2-1:0];
+	logic [7:0] txbuffer[TX_SIZE**2-1:0];
 
 	logic [TX_SIZE-1:0] txbot;
 	logic [TX_SIZE-1:0] txtop;

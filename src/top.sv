@@ -272,32 +272,6 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 				latancy <= latancy + 1;
 			end
 			e_start <= execute_done;
-			// if(pipe == FETCH) begin
-			// 	pipe <= DECODE;
-			// end
-			// else if(pipe == DECODE) begin
-			// 	e_start <= 1;
-			// 	pc <= d_npc;
-			// 	pipe <= EXECUTE;
-			// end
-			// else if(pipe == EXECUTE) begin
-			// 	if(latancy == 0) begin
-			// 		e_start <= 0;
-			// 	end
-			// 	if(latancy == de_wait_time) begin
-			// 		if(e_uart_state == 0) begin
-			// 			latancy <= 0;
-			// 			pipe <= WRITEREG;
-			// 		end
-			// 	end
-			// 	else if(latancy < de_wait_time) begin
-			// 		latancy <= latancy + 1;
-			// 	end
-			// end
-			// else if(pipe == WRITEREG) begin
-			// 	if(de_stop) pipe <= STOP;
-			// 	else pipe <= FETCH;
-			// end
 		end
 	 end
    end

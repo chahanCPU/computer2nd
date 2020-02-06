@@ -4,7 +4,7 @@ import constant::*;
 
 module fetch #( parameter CLK_PER_HALF_BIT = 434)
 	(input wire clk,
-	input wire mode,
+	input wire [2:0] mode,
 	input wire [31:0] pc,
 	input wire rstn,
 	output wire [31:0] inst,
