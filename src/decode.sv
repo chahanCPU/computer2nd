@@ -27,7 +27,8 @@ module decode
 	output wire [4:0] rd,
 	output wire [31:0] npc,
 	output wire [4:0] wait_time,
-	output wire hazard
+	output wire hazard,
+	output wire [31:0] omo
 );
 
 
@@ -51,8 +52,10 @@ module decode
 	logic do_nothing;
 	assign do_nothing = op_type == 2'b01 && inst[5:0] == 6'b1;
 
-	reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
-	reg [31:0][31:0] fpr = {32{32'b0}};
+	(* ram_style = "distributed" *) reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
+	(* ram_style = "distributed" *) reg [31:0][31:0] fpr = {32{32'b0}};
+
+	assign omo = gpr[29];
 
 	assign instr = inst[31:26] == OP_SPECIAL ? inst[5:0]
 					: inst[31:26] == OP_FPU ? inst[5:0]
@@ -126,8 +129,8 @@ module decode
 	assign npc = is_jr ? s
 				: jump ? bpc
 				: (inst[31:26] == OP_BEQ && s == t) ? bpc
-				: (inst[31:26] == OP_BGTZ && s > 0) ? bpc
-				: (inst[31:26] == OP_BLEZ && s <= 0) ? bpc
+				: (inst[31:26] == OP_BGTZ && $signed(s) > $signed(0)) ? bpc
+				: (inst[31:26] == OP_BLEZ && $signed(s) <= $signed(0)) ? bpc
 				: (inst[31:26] == OP_BNE && s != t) ? bpc
 				: pc + 4;
 	

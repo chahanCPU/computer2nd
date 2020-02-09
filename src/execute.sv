@@ -62,7 +62,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
-	logic [31:0] rxbuffer[(2**RX_SIZE)-1:0];
+	(* ram_style = "distributed" *) logic [31:0] rxbuffer[(2**RX_SIZE)-1:0];
 
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
@@ -76,17 +76,18 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
 	parameter TX_SIZE = 15;
-	logic [7:0] txbuffer[TX_SIZE**2-1:0];
+	logic [7:0] odata;
+	(* ram_style = "distributed" *) logic [7:0] txbuffer[TX_SIZE**2-1:0];
 
 	logic [TX_SIZE-1:0] txbot;
 	logic [TX_SIZE-1:0] txtop;
-	logic txwait;
+
 
 	reg 				 tx_start;
 	wire 			 tx_busy;
 
 
-	uart_tx #(CLK_PER_HALF_BIT) tx(txbuffer[txbot], tx_start, tx_busy, txd, clk, rstn);
+	uart_tx #(CLK_PER_HALF_BIT) tx(odata, tx_start, tx_busy, txd, clk, rstn);
 
 
 	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S));
@@ -127,11 +128,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
 	fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv finvo (s, fpu_inv_out);
+	finv finvo (s, clk, rstn, fpu_inv_out);
+	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
 	// fneg fnego (s, fpu_neg_out);
-	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
-	fsqrt fsqrto (s, fpu_sqrt_out);
+	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fsqrt fsqrto (s, fpu_sqrt_out);
 	feq feqo (s, t, fpu_eq_out);
 	flt flto (s, t, fpu_lt_out);
 	fle fleo (s, t, fpu_le_out);
@@ -188,9 +190,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 			txbot <= 0;
 			txtop <= 0;
-			txwait <= 0;
 			aa_sent <= 0;
 			op_in_out <= 0;
+			odata <= 0;
 		end
 		else begin
 
@@ -199,7 +201,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				if(aa_sent == 0) begin
 					if(txtop == 0) begin
 						txbuffer[txtop] <= 8'b10101010;
-						txtop <= txtop + 1;
+						txtop <= 1;
 					end
 					else begin
 						if(~tx_busy) begin
@@ -216,15 +218,14 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			end
 
 
-			if(txwait == 1) begin
+			if(tx_start == 1) begin
 				tx_start <= 0;
-				txbot <= txbot + 1;
-				txwait <= 0;
 			end
 			else begin
 				if (~tx_busy && txtop != txbot) begin
 					tx_start <= 1;
-					txwait <= 1;
+					odata <= txbuffer[txbot];
+					txbot <= txbot + 1;
 				end
 			end
 

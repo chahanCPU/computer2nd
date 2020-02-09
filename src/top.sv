@@ -52,6 +52,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] d_npc;
 	logic [4:0] d_wait_time;
 	logic d_hazard;
+	logic [31:0] d_omo;
 
 	logic [1:0] de_update;
 
@@ -88,7 +89,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [2:0] mode;
 	logic [7:0] pipe;
 	logic [31:0] inst;
-	assign led = pc[7:0] | (mode << 4);
+	assign led = d_omo[7:0];
 
 	logic [4:0] latancy;
 	logic [2:0] stage;
@@ -154,7 +155,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.rd(d_rd),
 		.npc(d_npc),
 		.wait_time(d_wait_time),
-		.hazard(d_hazard)
+		.hazard(d_hazard),
+		.omo(d_omo)
 	);
 
 	assign de_update = mode == EXEC ?  
@@ -246,7 +248,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
    always @(posedge clk) begin
     if (~rstn) begin
-		 pc <= 0;
+		 pc <= 32'b1;
 		 latancy <= 0;
 		 mode <= STALL;
 		 stage <= 0;
