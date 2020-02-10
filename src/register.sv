@@ -8,8 +8,8 @@ module forward
 	input wire [31:0] d,
 	input wire [1:0] rw,
 	input wire [4:0] rd,
-	input wire [31:0] fs,
-	input wire [31:0] ft
+	output wire [31:0] fs,
+	output wire [31:0] ft
 );
 
 	assign fs =

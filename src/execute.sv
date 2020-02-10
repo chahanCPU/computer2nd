@@ -62,7 +62,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
-	(* ram_style = "distributed" *) logic [31:0] rxbuffer[(2**RX_SIZE)-1:0];
+	(* ram_style = "distributed" *) logic [7:0] rxbuffer[(2**RX_SIZE)-1:0];
 
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
@@ -128,7 +128,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
 	fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv finvo (s, clk, rstn, fpu_inv_out);
+	// finv finvo (s, clk, rstn, fpu_inv_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
 	// fneg fnego (s, fpu_neg_out);

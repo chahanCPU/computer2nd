@@ -55,7 +55,7 @@ module decode
 	(* ram_style = "distributed" *) reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
 	(* ram_style = "distributed" *) reg [31:0][31:0] fpr = {32{32'b0}};
 
-	assign omo = gpr[29];
+	assign omo = gpr[2];
 
 	assign instr = inst[31:26] == OP_SPECIAL ? inst[5:0]
 					: inst[31:26] == OP_FPU ? inst[5:0]
