@@ -75,9 +75,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
-	parameter TX_SIZE = 15;
+	parameter TX_SIZE = 11;
 	logic [7:0] odata;
-	(* ram_style = "distributed" *) logic [7:0] txbuffer[TX_SIZE**2-1:0];
+	(* ram_style = "distributed" *) logic [7:0] txbuffer[(2**TX_SIZE)-1:0];
 
 	logic [TX_SIZE-1:0] txbot;
 	logic [TX_SIZE-1:0] txtop;
@@ -128,7 +128,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
 	fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	// finv finvo (s, clk, rstn, fpu_inv_out);
+	finv finvo (s, clk, rstn, fpu_inv_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
 	// fneg fnego (s, fpu_neg_out);
@@ -251,9 +251,11 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 					end
 				end
 				else begin
-					txbuffer[txtop] <= s[7:0];
-					txtop <= txtop + 1;
-					uart_state_reg <= 0;
+					if(txtop + {{(TX_SIZE-1){1'b0}}, 1'b1} != txbot) begin
+						txbuffer[txtop] <= s[7:0];
+						txtop <= txtop + 1;
+						uart_state_reg <= 0;
+					end
 				end
 			end
 		end
