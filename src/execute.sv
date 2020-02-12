@@ -62,7 +62,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
-	// (* ram_style = "distributed" *) logic [7:0] rxbuffer[(2**RX_SIZE)-1:0];
 
 
 	logic [RX_SIZE-1:0] rxbot;
@@ -83,18 +82,30 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	);
 
     uart_rx #(CLK_PER_HALF_BIT) rx(rdata, rx_ready, ferr, rxd, clk, rstn);
-	// assign op_in_out = rxbuffer[rxbot];
 
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
 	parameter TX_SIZE = 11;
 	logic [7:0] odata;
-	(* ram_style = "distributed" *) logic [7:0] txbuffer[(2**TX_SIZE)-1:0];
 
 	logic [TX_SIZE-1:0] txbot;
 	logic [TX_SIZE-1:0] txtop;
+	logic txwea;
+	logic [7:0] txin;
+	logic [7:0] txout;
+	logic [2:0] txlatancy;
 
+
+	UART_BRAM _TX(
+		.addra(txtop),
+		.clka(clk),
+		.dina(txin),
+		.wea(txwea),
+		.addrb(txbot),
+		.clkb(clk),
+		.doutb(txout)
+	);
 
 	reg 				 tx_start;
 	wire 			 tx_busy;
@@ -206,8 +217,13 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			aa_sent <= 0;
 			op_in_out <= 0;
 			odata <= 0;
+
 			rxwea <= 0;
 			rxlatancy <= 0;
+
+			txwea <= 0;
+			txlatancy <= 0;
+			txin <= 0;
 		end
 		else begin
 
@@ -215,8 +231,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			if(mode == 1) begin // for LOAD
 				if(aa_sent == 0) begin
 					if(txtop == 0) begin
-						txbuffer[txtop] <= 8'b10101010;
+						txin <= 8'b10101010;
 						txtop <= 1;
+						txwea <= 1;
 					end
 					else begin
 						if(~tx_busy) begin
@@ -228,23 +245,35 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 			//for EXEC
 			if(mode == 2 && rx_ready) begin
-				// rxbuffer[rxtop] <= {24'b0, rdata};
 				rxtop <= rxtop + 1;
 				rxwea <= 1;
 			end
-			else begin
+
+			if(rxwea) begin
 				rxwea <= 0;
+			end
+
+			if(txwea) begin
+				txwea <= 0;
 			end
 
 
 			if(tx_start == 1) begin
 				tx_start <= 0;
+				txlatancy = 0;
 			end
 			else begin
-				if (~tx_busy && txtop != txbot) begin
-					tx_start <= 1;
-					odata <= txbuffer[txbot];
-					txbot <= txbot + 1;
+				if ((~tx_busy && txtop != txbot) || txlatancy) begin
+					if(txlatancy == 0) begin
+						txbot <= txbot + 1;
+					end
+					if(txlatancy == 3'b11) begin
+						tx_start <= 1;
+						odata <= txout;
+					end
+					if(txlatancy <= 3'b11) begin
+						txlatancy <= txlatancy + 1;
+					end
 				end
 			end
 
@@ -279,8 +308,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				end
 				else begin
 					if(txtop + {{(TX_SIZE-1){1'b0}}, 1'b1} != txbot) begin
-						txbuffer[txtop] <= s[7:0];
+						txin <= s[7:0];
 						txtop <= txtop + 1;
+						txwea <= 1;
 						uart_state_reg <= 0;
 					end
 				end

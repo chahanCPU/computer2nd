@@ -97,6 +97,7 @@ module test_cpu
 	   sld=$fopen("/home/omochan/3A/cpujikken/core2/code/minrt/ball.sld.in","r");
 	   // gd=$fopen("/home/omochan/3A/cpujikken/core2/code/minrt/minrt.s.ppm","r");
 	   gd=$fopen("/home/omochan/3A/cpujikken/core2/code/minrt/minrt_small.s.ppm","r");
+	   // gd=$fopen("/home/omochan/3A/cpujikken/core2/code/out/out.s.ppm","r");
       $dumpfile("test_cpu.vcd");
       $dumpvars(0);
 
