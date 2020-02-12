@@ -126,13 +126,14 @@ module decode
 		: 5'b00000;
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
-	assign npc = is_jr ? s
-				: jump ? bpc
-				: (inst[31:26] == OP_BEQ && s == t) ? bpc
-				: (inst[31:26] == OP_BGTZ && $signed(s) > $signed(0)) ? bpc
-				: (inst[31:26] == OP_BLEZ && $signed(s) <= $signed(0)) ? bpc
-				: (inst[31:26] == OP_BNE && s != t) ? bpc
-				: pc + 4;
+	// assign npc = is_jr ? s
+	// 			: jump ? bpc
+	// 			: (inst[31:26] == OP_BEQ && s == t) ? bpc
+	// 			: (inst[31:26] == OP_BGTZ && $signed(s) > $signed(0)) ? bpc
+	// 			: (inst[31:26] == OP_BLEZ && $signed(s) <= $signed(0)) ? bpc
+	// 			: (inst[31:26] == OP_BNE && s != t) ? bpc
+	// 			: pc + 4;
+	assign npc = pc + 4; //tmp
 	
 	assign hazard =
 		(is_jr || inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
