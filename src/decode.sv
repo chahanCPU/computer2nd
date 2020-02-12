@@ -118,7 +118,7 @@ module decode
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
 	assign wait_time = 
-		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00001
+		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00010
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00101
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00101
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b00101

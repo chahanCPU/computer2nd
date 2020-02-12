@@ -62,14 +62,27 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
-	(* ram_style = "distributed" *) logic [7:0] rxbuffer[(2**RX_SIZE)-1:0];
+	// (* ram_style = "distributed" *) logic [7:0] rxbuffer[(2**RX_SIZE)-1:0];
+
 
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
+	logic rxwea;
+	logic [7:0] rxout;
+	logic [31:0] op_in_out;
+	logic [2:0] rxlatancy;
 
+	UART_BRAM _RX(
+		.addra(rxtop),
+		.clka(clk),
+		.dina(rdata),
+		.wea(rxwea),
+		.addrb(rxbot),
+		.clkb(clk),
+		.doutb(rxout)
+	);
 
     uart_rx #(CLK_PER_HALF_BIT) rx(rdata, rx_ready, ferr, rxd, clk, rstn);
-	logic [7:0] op_in_out;
 	// assign op_in_out = rxbuffer[rxbot];
 
 
@@ -193,6 +206,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			aa_sent <= 0;
 			op_in_out <= 0;
 			odata <= 0;
+			rxwea <= 0;
+			rxlatancy <= 0;
 		end
 		else begin
 
@@ -213,8 +228,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 			//for EXEC
 			if(mode == 2 && rx_ready) begin
-				rxbuffer[rxtop] <= {24'b0, rdata};
+				// rxbuffer[rxtop] <= {24'b0, rdata};
 				rxtop <= rxtop + 1;
+				rxwea <= 1;
+			end
+			else begin
+				rxwea <= 0;
 			end
 
 
@@ -234,13 +253,21 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				if(uart_state_reg == 0) begin
 					if(start == 1) begin
 						uart_state_reg <= 1;
+						rxlatancy <= 2'b00;
 					end
 				end
 				else begin
-					if(rxbot != rxtop) begin
-						op_in_out <= rxbuffer[rxbot];
-						rxbot <= rxbot + 1;
-						uart_state_reg <= 0;
+					if(rxbot != rxtop || rxlatancy) begin
+						if(rxlatancy == 0) begin
+							rxbot <= rxbot + 1;
+						end
+						if(rxlatancy == 3'b11) begin
+							op_in_out <= {24'b0, rxout};
+							uart_state_reg <= 0;
+						end
+						if(rxlatancy <= 3'b11) begin
+							rxlatancy <= rxlatancy + 1;
+						end
 					end
 				end
 			end

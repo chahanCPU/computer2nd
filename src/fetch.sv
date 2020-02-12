@@ -8,7 +8,7 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 	input wire [31:0] pc,
 	input wire rstn,
 	output wire [31:0] inst,
-	output reg done);
+	output logic done);
 
 	localparam STALL = 0;
 	localparam LOAD = 1;
@@ -25,6 +25,7 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 	assign pc_main = pc[INST_SIZE+1:2];
 
 	logic [INST_SIZE - 1 : 0] addra;
+	logic [INST_SIZE - 1 : 0] ppaddra;
 	logic [31:0] dina;
 	logic [0:0] wea;
 	logic [31:0] douta;
@@ -43,24 +44,20 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 			done <= 0;
 			latancy <= 0;
 			addra <= 0;
+			ppaddra <= 0;
 			dina <= 0;
 			wea <= 0;
 		end
 		else begin
 			if(mode == LOAD) begin
-				if(latancy == 0) begin
-					if(inst_mem[addra-1] == 32'b111111) begin
-						done <= 1;
-					end
-					else begin
-						latancy <= 1;
-					end
+				if(ppaddra == (2 ** INST_SIZE - 2)) begin
+					done <= 1;
 				end
-				else begin
-					inst_mem[addra] <= douta;
-					addra <= addra + 1;
-					latancy <= 0;
+				if(addra >= 2) begin
+					inst_mem[ppaddra] <= douta;
 				end
+				if(addra >= 2) ppaddra <= ppaddra + 1;
+				addra <= addra + 1;
 			end
 		end
 	end
