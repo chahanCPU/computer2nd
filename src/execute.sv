@@ -71,7 +71,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] op_in_out;
 	logic [2:0] rxlatancy;
 
-	UART_BRAM _RX(
+	UART_RX_BRAM _RX(
 		.addra(rxtop),
 		.clka(clk),
 		.dina(rdata),
@@ -97,7 +97,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [2:0] txlatancy;
 
 
-	UART_BRAM _TX(
+	UART_TX_BRAM _TX(
 		.addra(txtop),
 		.clka(clk),
 		.dina(txin),
