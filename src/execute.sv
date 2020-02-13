@@ -211,6 +211,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			rxbot <= 0;
 			rxtop <= 0;
 			uart_state_reg <= 0;
+			tx_start <= 0;
 
 			txbot <= 0;
 			txtop <= 0;
@@ -230,23 +231,19 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			//UART OPERATION
 			if(mode == 1) begin // for LOAD
 				if(aa_sent == 0) begin
-					if(txtop == 0) begin
-						txin <= 8'b10101010;
-						txtop <= 1;
-						txwea <= 1;
+					if(txlatancy == 0) begin
+						tx_start <= 1;
+						odata <= 8'b10101010;
+						txlatancy <= 1;
 					end
 					else begin
+						tx_start <= 0;
 						if(~tx_busy) begin
 							aa_sent <= 1;
+							txlatancy <= 0;
 						end
 					end
 				end
-			end
-
-			//for EXEC
-			if(mode == 2 && rx_ready) begin
-				rxtop <= rxtop + 1;
-				rxwea <= 1;
 			end
 
 			if(rxwea) begin
@@ -257,22 +254,30 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				txwea <= 0;
 			end
 
-
-			if(tx_start == 1) begin
-				tx_start <= 0;
-				txlatancy = 0;
+			//for EXEC
+			if(mode == 2 && rx_ready) begin
+				rxtop <= rxtop + 1;
+				rxwea <= 1;
 			end
-			else begin
-				if ((~tx_busy && txtop != txbot) || txlatancy) begin
-					if(txlatancy == 0) begin
-						txbot <= txbot + 1;
-					end
-					if(txlatancy == 3'b11) begin
-						tx_start <= 1;
-						odata <= txout;
-					end
-					if(txlatancy <= 3'b11) begin
-						txlatancy <= txlatancy + 1;
+
+
+			if(mode != 1) begin
+				if(tx_start == 1) begin
+					tx_start <= 0;
+					txlatancy = 0;
+				end
+				else begin
+					if ((~tx_busy && txtop != txbot) || txlatancy) begin
+						if(txlatancy == 0) begin
+							txbot <= txbot + 1;
+						end
+						if(txlatancy == 3'b11) begin
+							tx_start <= 1;
+							odata <= txout;
+						end
+						if(txlatancy <= 3'b11) begin
+							txlatancy <= txlatancy + 1;
+						end
 					end
 				end
 			end
