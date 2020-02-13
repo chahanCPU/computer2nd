@@ -14,9 +14,9 @@ module decode
 	input wire [5:0] de_instr,
 	output wire [1:0] op_type,
 	input wire [1:0] de_op_type,
-	output wire [31:0] s,
+	output logic [31:0] s,
 	output wire [5:0] rs,
-	output wire [31:0] t,
+	output logic [31:0] t,
 	output wire [5:0] rt,
 	output wire [31:0] imm,
 	output wire branch,
@@ -36,6 +36,8 @@ module decode
 
 	logic [31:0] tmp_s;
 	logic [31:0] tmp_t;
+	wire [31:0] sw;
+	wire [31:0] tw;
 	logic [31:0] bpc;
 	
 	forward _forward(
@@ -46,8 +48,8 @@ module decode
 		.d(dtowrite), 
 		.rw(rwin), 
 		.rd(rdin), 
-		.fs(s), 
-		.ft(t)
+		.fs(sw), 
+		.ft(tw)
 	);
 	logic do_nothing;
 	assign do_nothing = op_type == 2'b01 && inst[5:0] == 6'b1;
@@ -140,6 +142,8 @@ module decode
 			(de_op_type != 2'b01 || de_instr != 6'b1);
 	
 	always @(posedge clk) begin
+		s <= sw;
+		t <= tw;
 		if(rwin == 2'b01) begin
 			gpr[rdin] <= dtowrite;
 		end
