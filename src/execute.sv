@@ -54,7 +54,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	wire [4:0] h;
 
 	wire [31:0] douta;
-	wire [31:0] addra;
+	logic [31:0] addra;
 	wire [31:0] bpc;
 
 	logic uart_state_reg;
@@ -116,8 +116,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	uart_tx #(CLK_PER_HALF_BIT) tx(odata, tx_start, tx_busy, txd, clk, rstn);
 
 
-	assign wea = (op_type == 2'b0 && !start && (instr == OP_SW || instr == OP_SW_S));
-	assign addra = s + imm;
+	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S));
+	// assign addra = s + imm;
 	assign h = imm[10:6];
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
@@ -126,9 +126,11 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				: (branch && d == 32'b1) ? bpc
 				: pc + 4;
 
+	assign addra = sw + imm;
+
 	BRAM BRAM (
 		.addra (addra[BRAM_SIZE+1:2]),
-		.dina (t),
+		.dina (tw),
 		.wea (wea),
 		.clka (clk),
 		.douta (douta)
@@ -151,11 +153,11 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] fpu_ftoi_out;
 	logic [31:0] fpu_itof_out;
 
-	fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
-	fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
-	fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv finvo (s, clk, rstn, fpu_inv_out);
-	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
+	// fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
+	// fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	// finv finvo (s, clk, rstn, fpu_inv_out);
+	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -170,8 +172,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		op_type == 2'b01 ?
 			instr == FUNC_ADD ? s + t
 			: instr == FUNC_SUB ? s - t
-			: instr == FUNC_MULT ? s * t
-			: instr == FUNC_DIV ? s / t
+			// : instr == FUNC_MULT ? s * t
+			// : instr == FUNC_DIV ? s / t
 			: instr == FUNC_AND ? s & t
 			: instr == FUNC_OR ? s | t
 			: instr == FUNC_XOR ? s ^ t
