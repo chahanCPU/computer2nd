@@ -31,8 +31,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	output logic aa_sent
 );
 
-	wire [31:0] s;
-	wire [31:0] t;
+	logic [31:0] s;
+	logic [31:0] t;
+	wire [31:0] sw;
+	wire [31:0] tw;
 
 	forward _forward(
 		.s(de_s),
@@ -42,8 +44,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		.d(ew_d),
 		.rw(ew_rw),
 		.rd(ew_rd),
-		.fs(s),
-		.ft(t));
+		.fs(sw),
+		.ft(tw));
 
 	wire [7:0] 			 rdata;
     wire 			 rx_ready;
@@ -114,7 +116,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	uart_tx #(CLK_PER_HALF_BIT) tx(odata, tx_start, tx_busy, txd, clk, rstn);
 
 
-	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S));
+	assign wea = (op_type == 2'b0 && !start && (instr == OP_SW || instr == OP_SW_S));
 	assign addra = s + imm;
 	assign h = imm[10:6];
 
@@ -225,8 +227,14 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			txwea <= 0;
 			txlatancy <= 0;
 			txin <= 0;
+			s <= 0;
+			t <= 0;
 		end
 		else begin
+
+			//forwarding register
+			s <= sw;
+			t <= tw;
 
 			//UART OPERATION
 			if(mode == 1) begin // for LOAD
@@ -287,7 +295,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				if(uart_state_reg == 0) begin
 					if(start == 1) begin
 						uart_state_reg <= 1;
-						rxlatancy <= 2'b00;
+						rxlatancy <= 3'b0;
 					end
 				end
 				else begin
