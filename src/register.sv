@@ -68,6 +68,7 @@ module dereg
 	input wire [4:0] d_rd,
 	input wire [4:0] d_wait_time,
 	input wire [31:0] d_pc,
+	input wire [31:0] d_npc,
 
 	output logic [5:0] de_instr,
 	output logic [1:0] de_op_type,
@@ -83,7 +84,8 @@ module dereg
 	output logic de_stop,
 	output logic [4:0] de_rd,
 	output logic [4:0] de_wait_time,
-	output logic [31:0] de_pc
+	output logic [31:0] de_pc,
+	output logic [31:0] de_npc
 );
 
 	always @(posedge clk) begin
@@ -101,8 +103,9 @@ module dereg
 			de_is_jr <= 0;
 			de_stop <= 0;
 			de_rd <= 0;
-			de_pc <= 0;
 			de_wait_time <= 0;
+			de_pc <= 0;
+			de_npc <= 0;
 		end
 		else begin
 			if(update == 2'b01) begin
@@ -119,8 +122,9 @@ module dereg
 				de_is_jr <= d_is_jr;
 				de_stop <= d_stop;
 				de_rd <= d_rd;
-				de_pc <= d_pc;
 				de_wait_time <= d_wait_time;
+				de_pc <= d_pc;
+				de_npc <= d_npc;
 			end
 			else if(update == 2'b10) begin
 				de_instr <= 1;
@@ -136,8 +140,9 @@ module dereg
 				de_is_jr <= 0;
 				de_stop <= 0;
 				de_rd <= 0;
-				de_pc <= 0;
 				de_wait_time <= 0;
+				de_pc <= 0;
+				de_npc <= 0;
 			end
 		end
 	end

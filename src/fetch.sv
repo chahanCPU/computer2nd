@@ -21,8 +21,8 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 	reg [31:0] inst_mem[(2 ** INST_SIZE - 1) : 0];
 
 
-	assign inst = inst_mem[pc_main];
 	assign pc_main = pc[INST_SIZE+1:2];
+	assign inst = inst_mem[pc_main];
 
 	logic [INST_SIZE - 1 : 0] addra;
 	logic [INST_SIZE - 1 : 0] ppaddra;

@@ -71,6 +71,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [4:0] de_rd;
 	logic [4:0] de_wait_time;
 	logic [31:0] de_pc;
+	logic [31:0] de_npc;
 
 
 	logic [31:0] e_d;
@@ -107,23 +108,31 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	fetch #(CLK_PER_HALF_BIT) _fetch(
 		.clk(clk), 
 		.mode(mode), 
-		.pc(d_npc), 
+		.pc(pc), 
 		.rstn(rstn), 
 		.inst(f_inst), 
 		.done(load_done)
 	);
 
 	wire execute_done = (latancy == de_wait_time && e_uart_state == 0);
+	wire npc_stall = de_jump || de_branch || de_is_jr;
 
-	assign fd_update = mode == EXEC ?
-		execute_done ? d_hazard ? 2'b00 : 2'b01 : 2'b00
+	assign pc = npc_stall ? de_npc : fd_pc + 4;
+
+	assign fd_update = 
+		mode == EXEC ?
+			execute_done ?
+				npc_stall ?
+					2'b01 
+				: d_hazard ? 2'b00 : 2'b01 
+			: 2'b00
 		: 2'b10;
 
 	fdreg _fdreg(
 		.clk(clk),
 		.rstn(rstn),
 		.update(fd_update),
-		.f_pc(d_npc),
+		.f_pc(pc),
 		.f_inst(f_inst),
 
 		.fd_pc(fd_pc),
@@ -159,8 +168,13 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.omo(d_omo)
 	);
 
-	assign de_update = mode == EXEC ?  
-		execute_done ? d_hazard ? 2'b10 : 2'b01 : 2'b00
+	assign de_update = 
+		mode == EXEC ?  
+			execute_done ? 
+				d_hazard || npc_stall ? 
+					2'b10 
+				: 2'b01 
+			: 2'b00
 		: 2'b10;
 
 	dereg _dereg(
@@ -182,6 +196,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.d_rd(d_rd),
 		.d_wait_time(d_wait_time),
 		.d_pc(fd_pc),
+		.d_npc(d_npc),
 
 		.de_instr(de_instr),
 		.de_op_type(de_op_type),
@@ -197,7 +212,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.de_stop(de_stop),
 		.de_rd(de_rd),
 		.de_wait_time(de_wait_time),
-		.de_pc(de_pc)
+		.de_pc(de_pc),
+		.de_npc(de_npc)
 	);
 
 
@@ -248,7 +264,6 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
    always @(posedge clk) begin
     if (~rstn) begin
-		 pc <= 32'b1;
 		 latancy <= 0;
 		 mode <= STALL;
 		 stage <= 0;
