@@ -109,6 +109,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		.doutb(txout)
 	);
 
+
 	reg 				 tx_start;
 	wire 			 tx_busy;
 
@@ -173,11 +174,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		.m_axis_dout_tvalid(div_valid)
 	);
 
-	// fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
-	// fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
-	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
-	// finv finvo (s, clk, rstn, fpu_inv_out);
-	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+
+	fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
+	fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
+	fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	finv finvo (s, clk, rstn, fpu_inv_out);
+	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -192,10 +194,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		op_type == 2'b01 ?
 			instr == FUNC_ADD ? s + t
 			: instr == FUNC_SUB ? s - t
-			// : instr == FUNC_MULT ? mul_out
-			// : instr == FUNC_DIV ? div_out[63:32]
-			: instr == FUNC_MULT ? s * t
-			: instr == FUNC_DIV ? s / t
+			: instr == FUNC_MULT ? mul_out
+			: instr == FUNC_DIV ? div_out[63:32]
+			// : instr == FUNC_MULT ? s * t
+			// : instr == FUNC_DIV ? s / t
 			: instr == FUNC_AND ? s & t
 			: instr == FUNC_OR ? s | t
 			: instr == FUNC_XOR ? s ^ t

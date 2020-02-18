@@ -90,7 +90,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [2:0] mode;
 	logic [7:0] pipe;
 	logic [31:0] inst;
-	assign led = d_npc[9:2];
+	// assign led = d_npc[9:2];
+	assign led = d_omo[9:2] | (1 << 7);
 
 	logic [4:0] latancy;
 	logic [2:0] stage;

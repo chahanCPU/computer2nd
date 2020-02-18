@@ -49,14 +49,16 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 		end
 		else begin
 			if(mode == LOAD) begin
-				if(ppaddra == (2 ** INST_SIZE - 2)) begin
-					done <= 1;
+				if(~done) begin
+					if(addra == {INST_SIZE{1'b1}}) begin
+						done <= 1;
+					end
+					if(addra >= 2) begin
+						inst_mem[ppaddra] <= douta;
+						ppaddra <= ppaddra + 1;
+					end
+					addra <= addra + 1;
 				end
-				if(addra >= 2) begin
-					inst_mem[ppaddra] <= douta;
-				end
-				if(addra >= 2) ppaddra <= ppaddra + 1;
-				addra <= addra + 1;
 			end
 			else begin
 				pc_main <= pc[INST_SIZE+1:2];
