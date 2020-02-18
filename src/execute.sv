@@ -135,6 +135,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		.douta (douta)
 	);
 
+	logic [31:0] mul_out;
+	logic [63:0] div_out;
+	logic div_valid;
+
 
 	logic [31:0] fpu_add_out;
 	logic fpu_add_ovf;
@@ -152,11 +156,28 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] fpu_ftoi_out;
 	logic [31:0] fpu_itof_out;
 
-	fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
-	fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
-	fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv finvo (s, clk, rstn, fpu_inv_out);
-	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	MUL32_32 _MUL(
+		.CLK(clk), 
+		.A(s), 
+		.B(t),
+		.P(mul_out)
+	);
+	
+	DIV32 _DIV(
+		.s_axis_divisor_tdata(t),
+		.s_axis_divisor_tvalid(1'b1),
+		.s_axis_dividend_tdata(s),
+		.s_axis_dividend_tvalid(1'b1),
+		.aclk(clk),
+		.m_axis_dout_tdata(div_out),
+		.m_axis_dout_tvalid(div_valid)
+	);
+
+	// fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
+	// fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
+	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	// finv finvo (s, clk, rstn, fpu_inv_out);
+	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -171,6 +192,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		op_type == 2'b01 ?
 			instr == FUNC_ADD ? s + t
 			: instr == FUNC_SUB ? s - t
+			// : instr == FUNC_MULT ? mul_out
+			// : instr == FUNC_DIV ? div_out[63:32]
 			: instr == FUNC_MULT ? s * t
 			: instr == FUNC_DIV ? s / t
 			: instr == FUNC_AND ? s & t
@@ -268,8 +291,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 			//for EXEC
 			if(mode == 2 && rx_ready) begin
-				rxtop <= rxtop + 1;
-				rxwea <= 1;
+			rxtop <= rxtop + 1;
+			rxwea <= 1;
 			end
 
 
