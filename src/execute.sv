@@ -180,6 +180,9 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
 	// finv finvo (s, clk, rstn, fpu_inv_out);
 	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	finv_old finvo (s, fpu_inv_out);
+	fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);

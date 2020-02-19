@@ -79,19 +79,20 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic e_start;
 	logic e_uart_state;
 
-	logic [31:0] ew_npc;
 
+	logic ew_branch;
+	logic [31:0] ew_npc;
 	logic [31:0] ew_d;
 	logic [4:0] ew_rd;
 	logic [1:0] ew_rw;
+
 	logic [1:0] ew_update;
 
 
 	logic [2:0] mode;
 	logic [7:0] pipe;
 	logic [31:0] inst;
-	// assign led = d_npc[9:2];
-	assign led = d_omo[9:2] | (1 << 7);
+	assign led = d_npc[9:2];
 
 	logic [4:0] latancy;
 	logic [2:0] stage;
@@ -254,10 +255,14 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.clk(clk),
 		.rstn(rstn),
 		.update(ew_update),
+		.e_branch(de_branch),
+		.e_npc(e_npc),
 		.e_d(e_d),
 		.e_rw(de_rw),
 		.e_rd(de_rd),
 
+		.ew_branch(ew_branch),
+		.ew_npc(ew_npc),
 		.ew_d(ew_d),
 		.ew_rw(ew_rw),
 		.ew_rd(ew_rd)

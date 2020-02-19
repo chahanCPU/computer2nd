@@ -154,10 +154,14 @@ module ewreg
 	input wire rstn,
 	input wire [1:0] update,
 
+	input wire e_branch,
+	input wire [31:0] e_npc,
 	input wire [31:0] e_d,
 	input wire [1:0] e_rw,
 	input wire [4:0] e_rd,
 
+	output logic ew_branch,
+	output logic [31:0] ew_npc,
 	output logic [31:0] ew_d,
 	output logic [1:0] ew_rw,
 	output logic [4:0] ew_rd
@@ -165,17 +169,23 @@ module ewreg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
+			ew_branch <= 0;
+			ew_npc <= 0;
 			ew_d <= 0;
 			ew_rw <= 0;
 			ew_rd <= 0;
 		end
 		else begin
 			if(update == 2'b01) begin
+				ew_branch <= e_branch;
+				ew_npc <= e_npc;
 				ew_d <= e_d;
 				ew_rw <= e_rw;
 				ew_rd <= e_rd;
 			end
 			else if(update == 2'b10) begin
+				ew_branch <= 0;
+				ew_npc <= 0;
 				ew_d <= 0;
 				ew_rw <= 0;
 				ew_rd <= 0;
