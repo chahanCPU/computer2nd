@@ -195,27 +195,27 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign d = 
 		op_type == 2'b01 ?
-			instr == FUNC_ADD ? s + t
-			: instr == FUNC_SUB ? s - t
+			instr == FUNC_ADD ? sw + tw
+			: instr == FUNC_SUB ? sw - tw
 			: instr == FUNC_MULT ? mul_out
 			: instr == FUNC_DIV ? div_out[63:32]
 			// : instr == FUNC_MULT ? s * t
 			// : instr == FUNC_DIV ? s / t
-			: instr == FUNC_AND ? s & t
-			: instr == FUNC_OR ? s | t
-			: instr == FUNC_XOR ? s ^ t
+			: instr == FUNC_AND ? sw & tw
+			: instr == FUNC_OR ? sw | tw
+			: instr == FUNC_XOR ? sw ^ tw
 			: instr == FUNC_SLT ? $signed(s) < $signed(t)
-			: instr == FUNC_SLL ? t << h
-			: instr == FUNC_SLLV ? t << s
-			: instr == FUNC_SRL ? t >> h
-			: instr == FUNC_SRLV ? t >> s
+			: instr == FUNC_SLL ? tw << h
+			: instr == FUNC_SLLV ? tw << sw
+			: instr == FUNC_SRL ? tw >> h
+			: instr == FUNC_SRLV ? tw >> sw
 			: 32'b0
 		: op_type == 2'b10 ?
 			instr == FPU_ADD ? fpu_add_out
 			: instr == FPU_SUB ? fpu_sub_out
 			: instr == FPU_MUL ? fpu_mul_out
 			: instr == FPU_INV ? fpu_inv_out
-			: instr == FPU_NEG ? s ^ (32'h80000000)
+			: instr == FPU_NEG ? sw ^ (32'h80000000)
 			: instr == FPU_SQRT ? fpu_sqrt_out
 			: instr == FPU_EQ ? fpu_eq_out
 			: instr == FPU_LT ? fpu_lt_out
@@ -224,16 +224,20 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FPU_ITOF ? fpu_itof_out
 			: 32'b0
 		: op_type == 2'b00 ? 
-			instr == OP_ADDI ? s + imm
-			: instr == OP_ANDI ? s & imm
-			: instr == OP_ORI ? s | imm
-			: instr == OP_XORI ? s ^ {16'b0, imm[15:0]}
-			: instr == OP_SLTI ? $signed(s) < $signed(imm)
+			instr == OP_ADDI ? sw + imm
+			: instr == OP_ANDI ? sw & imm
+			: instr == OP_ORI ? sw | imm
+			: instr == OP_XORI ? sw ^ {16'b0, imm[15:0]}
+			: instr == OP_SLTI ? $signed(sw) < $signed(imm)
 			: instr == OP_LUI ? (imm << 16)
 			: instr == OP_LW ? douta
 			: instr == OP_LW_S ? douta
-			: instr == OP_JAL ? s
+			: instr == OP_JAL ? sw
 			: instr == OP_IN ? op_in_out
+			: instr == OP_BEQ ? sw == tw
+			: instr == OP_BGTZ ? $signed(sw) > $signed(0)
+			: instr == OP_BLEZ ? $signed(sw) <= $signed(0)
+			: instr == OP_BNE ? sw != tw
 			: 32'b0
 		: 32'b0;
 

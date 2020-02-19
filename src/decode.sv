@@ -121,22 +121,20 @@ module decode
 				: inst[15:11];
 	assign wait_time = 
 		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00100
+		: (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S) ? 5'b00001
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00101
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_MUL)  ? 5'b00110
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00101
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b11111
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SQRT)  ? 5'b11111
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_NEG) ? 5'b00000
+		: (inst[31:26] == OP_FPU) ? 5'b00001
 		: (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_MULT) ? 5'b00101
 		: (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_DIV) ? 5'b11111
-		: 5'b00001;
+		: 5'b00000;
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
-	assign npc = is_jr ? s
-				: jump ? bpc
-				: (inst[31:26] == OP_BEQ && s == t) ? bpc
-				: (inst[31:26] == OP_BGTZ && $signed(s) > $signed(0)) ? bpc
-				: (inst[31:26] == OP_BLEZ && $signed(s) <= $signed(0)) ? bpc
-				: (inst[31:26] == OP_BNE && s != t) ? bpc
+	assign npc = jump ? bpc
 				: pc + 4;
 	
 	assign hazard =

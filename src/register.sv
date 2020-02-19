@@ -103,7 +103,7 @@ module dereg
 			de_is_jr <= 0;
 			de_stop <= 0;
 			de_rd <= 0;
-			de_wait_time <= 1;
+			de_wait_time <= 0;
 			de_pc <= 0;
 			de_npc <= 0;
 		end
@@ -140,7 +140,7 @@ module dereg
 				de_is_jr <= 0;
 				de_stop <= 0;
 				de_rd <= 0;
-				de_wait_time <= 1;
+				de_wait_time <= 0;
 				de_pc <= 0;
 				de_npc <= 0;
 			end

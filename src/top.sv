@@ -116,17 +116,12 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.done(load_done)
 	);
 
-	wire execute_done = (latancy == de_wait_time && e_uart_state == 0);
-	wire npc_stall = de_jump || de_branch || de_is_jr;
-
-	assign pc = npc_stall ? de_npc : fd_pc + 4;
+	wire npc_stall = d_jump && latancy == 0;
+	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
 	assign fd_update = 
 		mode == EXEC ?
-			execute_done ?
-				npc_stall ?
-					2'b01 
-				: d_hazard ? 2'b00 : 2'b01 
+			execute_done ? 2'b01 
 			: 2'b00
 		: 2'b10;
 
@@ -173,9 +168,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	assign de_update = 
 		mode == EXEC ?  
 			execute_done ? 
-				d_hazard || npc_stall ? 
-					2'b10 
-				: 2'b01 
+				2'b01 
 			: 2'b00
 		: 2'b10;
 
@@ -247,8 +240,11 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.aa_sent(aa_sent)
 	);
 
-	assign ew_update = mode == EXEC ?
-		execute_done ? 2'b01 : 2'b00
+	assign ew_update = 
+		mode == EXEC ?
+			execute_done ? 
+				2'b01 
+			: 2'b00
 		: 2'b10;
 
 	ewreg _ewreg(
@@ -274,6 +270,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		 mode <= STALL;
 		 stage <= 0;
 		 e_start <= 0;
+		 pc <= 0;
 	end 
 	else begin
 		if (mode == STALL) begin
@@ -286,12 +283,18 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 				mode <= EXEC;
 			end
 		end
-		else begin
+		else if(mode == EXEC) begin
 			if(de_stop) mode <= STOP;
 			if(execute_done) begin
 				latancy <= 0;
+				if(!d_jump) begin
+					pc <= pc + 4;
+				end
 			end
-			if(latancy < de_wait_time) begin
+			else if(npc_stall) begin
+				pc <= d_npc;
+			end
+			if(latancy < de_wait_time || npc_stall) begin
 				latancy <= latancy + 1;
 			end
 			e_start <= execute_done;
