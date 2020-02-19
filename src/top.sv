@@ -51,7 +51,6 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [4:0] d_rd;
 	logic [31:0] d_npc;
 	logic [4:0] d_wait_time;
-	logic d_hazard;
 	logic [31:0] d_omo;
 
 	logic [1:0] de_update;
@@ -78,6 +77,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] e_npc;
 	logic e_start;
 	logic e_uart_state;
+	logic hazard;
 
 
 	logic ew_branch;
@@ -119,8 +119,11 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	wire npc_stall = d_jump && latancy == 0;
 	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
+	assign hazard = ew_branch && ew_npc != de_pc;
+
 	assign fd_update = 
 		mode == EXEC ?
+			hazard ? 2'b10 :
 			execute_done ? 2'b01 
 			: 2'b00
 		: 2'b10;
@@ -161,12 +164,12 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.rd(d_rd),
 		.npc(d_npc),
 		.wait_time(d_wait_time),
-		.hazard(d_hazard),
 		.omo(d_omo)
 	);
 
 	assign de_update = 
 		mode == EXEC ?  
+			hazard ? 2'b10 :
 			execute_done ? 
 				2'b01 
 			: 2'b00
@@ -232,6 +235,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.jump(de_jump),
 		.is_jr(de_is_jr), 
 		.mode(mode),
+		.hazard(hazard),
 		.start(e_start), 
 		.d(e_d), 
 		.npc(e_npc),
@@ -242,6 +246,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign ew_update = 
 		mode == EXEC ?
+			hazard ? 2'b10 :
 			execute_done ? 
 				2'b01 
 			: 2'b00
@@ -285,11 +290,13 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		end
 		else if(mode == EXEC) begin
 			if(de_stop) mode <= STOP;
-			if(execute_done) begin
+			if(hazard) begin
 				latancy <= 0;
-				if(!d_jump) begin
-					pc <= pc + 4;
-				end
+				pc <= ew_npc;
+			end
+			else if(execute_done) begin
+				latancy <= 0;
+				pc <= pc + 4;
 			end
 			else if(npc_stall) begin
 				pc <= d_npc;

@@ -27,7 +27,6 @@ module decode
 	output wire [4:0] rd,
 	output wire [31:0] npc,
 	output wire [4:0] wait_time,
-	output wire hazard,
 	output wire [31:0] omo
 );
 
@@ -136,11 +135,6 @@ module decode
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
 	assign npc = jump ? bpc
 				: pc + 4;
-	
-	assign hazard =
-		(is_jr || inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
-		|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE) &&
-			(de_op_type != 2'b01 || de_instr != 6'b1);
 	
 	always @(posedge clk) begin
 		s <= sw;

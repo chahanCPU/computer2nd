@@ -16,8 +16,6 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 
 
 
-	logic [INST_SIZE-1:0] pc_main;
-
 	reg [31:0] inst_mem[(2 ** INST_SIZE - 1) : 0];
 
 
@@ -59,9 +57,6 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 					end
 					addra <= addra + 1;
 				end
-			end
-			else begin
-				pc_main <= pc[INST_SIZE+1:2];
 			end
 		end
 	end

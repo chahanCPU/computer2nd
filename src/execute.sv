@@ -23,6 +23,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	input wire is_jr,
 	input wire start,
 	input wire [2:0] mode,
+	input wire hazard,
 	// output logic [31:0] d,
 	output wire [31:0] d,
 	output wire [31:0] npc,
@@ -329,7 +330,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 			if(op_type == 2'b00 && instr == OP_IN) begin
 				if(uart_state_reg == 0) begin
-					if(start == 1) begin
+					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
 						rxlatancy <= 3'b0;
 					end
@@ -351,7 +352,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			end
 			else if(op_type == 2'b00 && instr == OP_OUT) begin
 				if(uart_state_reg == 0) begin
-					if(start == 1) begin
+					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
 					end
 				end

@@ -31,7 +31,7 @@ module fdreg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
-			fd_pc <= 32'hfffffffc;
+			fd_pc <= 32'b0;
 			fd_inst <= 1;
 		end
 		else begin
@@ -40,7 +40,7 @@ module fdreg
 				fd_inst <= f_inst;
 			end
 			else if(update == 2'b10) begin
-				fd_pc <= 32'hfffffffc;
+				fd_pc <= 32'b0;
 				fd_inst <= 1;
 			end
 		end
