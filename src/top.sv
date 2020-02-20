@@ -81,6 +81,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
 
 	logic ew_branch;
+	logic ew_is_jr;
 	logic [31:0] ew_npc;
 	logic [31:0] ew_d;
 	logic [4:0] ew_rd;
@@ -119,7 +120,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	wire npc_stall = d_jump && latancy == 0;
 	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
-	assign hazard = ew_branch && ew_npc != de_pc;
+	assign hazard = (ew_branch || ew_is_jr) && ew_npc != de_pc;
 
 	assign fd_update = 
 		mode == EXEC ?
@@ -256,12 +257,14 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.clk(clk),
 		.rstn(rstn),
 		.update(ew_update),
+		.e_is_jr(de_is_jr),
 		.e_branch(de_branch),
 		.e_npc(e_npc),
 		.e_d(e_d),
 		.e_rw(de_rw),
 		.e_rd(de_rd),
 
+		.ew_is_jr(ew_is_jr),
 		.ew_branch(ew_branch),
 		.ew_npc(ew_npc),
 		.ew_d(ew_d),

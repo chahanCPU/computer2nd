@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+//07:44:07:337-07:42:36:692
 import constant::*;
 
 module execute #( parameter CLK_PER_HALF_BIT = 434)
@@ -123,11 +124,18 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	assign h = imm[10:6];
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
+	// assign npc = is_jr ? d
+	// 			: jump ? bpc
+	// 			: (branch && d == 32'b1) ? bpc
+	// 			: pc + 4;
+
 	assign npc = is_jr ? d
 				: jump ? bpc
-				: (branch && d == 32'b1) ? bpc
+				: (op_type == 2'b00 && instr == OP_BEQ && sw == tw) ? bpc
+				: (op_type == 2'b00 && instr == OP_BLEZ && $signed(sw) <= $signed(0)) ? bpc
+				: (op_type == 2'b00 && instr == OP_BGTZ && $signed(sw) > $signed(0)) ? bpc
+				: (op_type == 2'b00 && instr == OP_BNE && sw != tw) ? bpc
 				: pc + 4;
-
 
 	BRAM BRAM (
 		.addra (addra[BRAM_SIZE+1:2]),
@@ -178,12 +186,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
-	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
-	// finv finvo (s, clk, rstn, fpu_inv_out);
-	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
-	fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv_old finvo (s, fpu_inv_out);
-	fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
+	fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	finv finvo (s, clk, rstn, fpu_inv_out);
+	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	// finv_old finvo (s, fpu_inv_out);
+	// fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -205,11 +213,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FUNC_AND ? sw & tw
 			: instr == FUNC_OR ? sw | tw
 			: instr == FUNC_XOR ? sw ^ tw
-			: instr == FUNC_SLT ? $signed(s) < $signed(t)
+			: instr == FUNC_SLT ? $signed(sw) < $signed(tw)
 			: instr == FUNC_SLL ? tw << h
 			: instr == FUNC_SLLV ? tw << sw
 			: instr == FUNC_SRL ? tw >> h
 			: instr == FUNC_SRLV ? tw >> sw
+			: instr == FUNC_JR ? sw
 			: 32'b0
 		: op_type == 2'b10 ?
 			instr == FPU_ADD ? fpu_add_out

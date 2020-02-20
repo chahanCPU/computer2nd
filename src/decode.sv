@@ -14,9 +14,9 @@ module decode
 	input wire [5:0] de_instr,
 	output wire [1:0] op_type,
 	input wire [1:0] de_op_type,
-	output logic [31:0] s,
+	output wire [31:0] s,
 	output wire [5:0] rs,
-	output logic [31:0] t,
+	output wire [31:0] t,
 	output wire [5:0] rt,
 	output wire [31:0] imm,
 	output wire branch,
@@ -47,8 +47,8 @@ module decode
 		.d(dtowrite), 
 		.rw(rwin), 
 		.rd(rdin), 
-		.fs(sw), 
-		.ft(tw)
+		.fs(s), 
+		.ft(t)
 	);
 	logic do_nothing;
 	assign do_nothing = op_type == 2'b01 && inst[5:0] == 6'b1;
@@ -119,11 +119,11 @@ module decode
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
 	assign wait_time = 
-		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00100
+		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00011
 		: (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S) ? 5'b00001
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00101
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00100
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_MUL)  ? 5'b00110
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00101
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00100
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b11111
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SQRT)  ? 5'b11111
 		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_NEG) ? 5'b00000
@@ -137,8 +137,8 @@ module decode
 				: pc + 4;
 	
 	always @(posedge clk) begin
-		s <= sw;
-		t <= tw;
+		// s <= sw;
+		// t <= tw;
 		if(rwin == 2'b01) begin
 			gpr[rdin] <= dtowrite;
 		end
