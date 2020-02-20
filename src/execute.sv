@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-//07:44:07:337-07:42:36:692
+//reminder, change tx buffer size
 import constant::*;
 
 module execute #( parameter CLK_PER_HALF_BIT = 434)
