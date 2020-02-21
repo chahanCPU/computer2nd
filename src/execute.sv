@@ -137,13 +137,13 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 				: (op_type == 2'b00 && instr == OP_BNE && sw != tw) ? bpc
 				: pc + 4;
 
-	// BRAM BRAM (
-	// 	.addra (addra[BRAM_SIZE+1:2]),
-	// 	.dina (t),
-	// 	.wea (wea),
-	// 	.clka (clk),
-	// 	.douta (douta)
-	// );
+	BRAM BRAM (
+		.addra (addra[BRAM_SIZE+1:2]),
+		.dina (t),
+		.wea (wea),
+		.clka (clk),
+		.douta (douta)
+	);
 
 	logic [31:0] mul_out;
 	logic [63:0] div_out;
@@ -186,12 +186,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
-	fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
-	finv finvo (s, clk, rstn, fpu_inv_out);
-	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
-	// fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	// finv_old finvo (s, fpu_inv_out);
-	// fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	// finv finvo (s, clk, rstn, fpu_inv_out);
+	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	finv_old finvo (s, fpu_inv_out);
+	fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -199,8 +199,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	feq feqo (s, t, fpu_eq_out);
 	flt flto (s, t, fpu_lt_out);
 	fle fleo (s, t, fpu_le_out);
-	// ftoi ftoio (s, fpu_ftoi_out);
-	// itof itofo (s, fpu_itof_out);
+	ftoi ftoio (s, fpu_ftoi_out);
+	itof itofo (s, fpu_itof_out);
 
 	assign d = 
 		op_type == 2'b01 ?

@@ -46,7 +46,6 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 			dina <= 0;
 			wea <= 0;
 			tdouta <= 0;
-			pc_main <= 0;
 			// inst <= 0;
 		end
 		else begin
@@ -61,10 +60,6 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 					end
 					addra <= addra + 1;
 				end
-			end
-			else begin
-				pc_main <= pc[INST_SIZE+1:2];
-				// inst <= inst + 1;
 			end
 		end
 	end
