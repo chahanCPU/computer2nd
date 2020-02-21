@@ -90,7 +90,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
-	parameter TX_SIZE = 11;
+	parameter TX_SIZE = 14;
 	logic [7:0] odata;
 
 	logic [TX_SIZE-1:0] txbot;
