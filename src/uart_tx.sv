@@ -15,6 +15,7 @@ module uart_tx #(CLK_PER_HALF_BIT = 5208) (
    logic [3:0]                  status;
    logic [31:0]                 counter;
    logic                        next;
+
    
    localparam s_idle = 0;
    localparam s_start_bit = 1;
@@ -27,18 +28,15 @@ module uart_tx #(CLK_PER_HALF_BIT = 5208) (
    localparam s_bit_6 = 8;
    localparam s_bit_7 = 9;
    localparam s_stall_bit1 = 10;
-   localparam s_stall_bit2 = 11;
-   localparam s_stall_bit3 = 12;
-   localparam s_stall_bit4 = 13;
-   localparam s_stall_bit5 = 14;
-   localparam s_stop_bit = 15;
+   localparam s_stop_bit = 11;
    
+   assign tx_busy = status != 0 || tx_start;
+
    always @(posedge clk) begin
       if (~rstn) begin
          txbuf <= 8'b0;
          status <= s_idle;
          txd <= 1;
-         tx_busy <= 0;
 		 counter <= 0;
       end else begin
          if (status == s_idle) begin
@@ -46,20 +44,16 @@ module uart_tx #(CLK_PER_HALF_BIT = 5208) (
                txbuf <= sdata;
                status <= s_start_bit;
                txd <= 0;
-               tx_busy <= 1;
 			   counter <= 0;
             end
          end 
 		 else if (status == s_stop_bit && counter == e_clk_bit) begin
 			   txd <= 1;
 			   status <= s_idle;
-			   tx_busy <= 0;
 			   counter <= 0;
          end 
 		 else if (counter == e_clk_bit) begin
-            if (status == s_bit_7 || status == s_stall_bit1 
-				|| status == s_stall_bit2 || status == s_stall_bit3
-				|| status == s_stall_bit4 || status == s_stall_bit5) begin
+            if (status == s_bit_7 || status == s_stall_bit1) begin
                txd <= 1;
                status <= status + 1;
 			   counter <= 0;

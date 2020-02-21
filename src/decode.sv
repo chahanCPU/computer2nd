@@ -27,7 +27,6 @@ module decode
 	output wire [4:0] rd,
 	output wire [31:0] npc,
 	output wire [4:0] wait_time,
-	output wire hazard,
 	output wire [31:0] omo
 );
 
@@ -36,6 +35,8 @@ module decode
 
 	logic [31:0] tmp_s;
 	logic [31:0] tmp_t;
+	wire [31:0] sw;
+	wire [31:0] tw;
 	logic [31:0] bpc;
 	
 	forward _forward(
@@ -55,7 +56,7 @@ module decode
 	(* ram_style = "distributed" *) reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
 	(* ram_style = "distributed" *) reg [31:0][31:0] fpr = {32{32'b0}};
 
-	assign omo = gpr[2];
+	assign omo = gpr[29];
 
 	assign instr = inst[31:26] == OP_SPECIAL ? inst[5:0]
 					: inst[31:26] == OP_FPU ? inst[5:0]
@@ -118,29 +119,26 @@ module decode
 				: inst[31:26] == OP_IN ? inst[25:21]
 				: inst[15:11];
 	assign wait_time = 
-		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00001
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00101
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00101
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b00101
-		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SQRT)  ? 5'b00101
+		  (inst[31:26] == OP_LW || inst[31:26] == OP_LW_S) ? 5'b00011
+		: (inst[31:26] == OP_SW || inst[31:26] == OP_SW_S) ? 5'b00001
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_ADD)  ? 5'b00100
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_MUL)  ? 5'b00110
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SUB)  ? 5'b00100
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_INV)  ? 5'b11111
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_SQRT)  ? 5'b11111
+		: (inst[31:26] == OP_FPU && inst[5:0] == FPU_NEG) ? 5'b00000
+		: (inst[31:26] == OP_FPU) ? 5'b00001
+		: (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_MULT) ? 5'b00101
+		: (inst[31:26] == OP_SPECIAL && inst[5:0] == FUNC_DIV) ? 5'b11111
 		: 5'b00000;
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
-	// assign npc = is_jr ? s
-	// 			: jump ? bpc
-	// 			: (inst[31:26] == OP_BEQ && s == t) ? bpc
-	// 			: (inst[31:26] == OP_BGTZ && $signed(s) > $signed(0)) ? bpc
-	// 			: (inst[31:26] == OP_BLEZ && $signed(s) <= $signed(0)) ? bpc
-	// 			: (inst[31:26] == OP_BNE && s != t) ? bpc
-	// 			: pc + 4;
-	assign npc = pc + 4; //tmp
-	
-	assign hazard =
-		(is_jr || inst[31:26] == OP_BEQ || inst[31:26] == OP_BGTZ
-		|| inst[31:26] == OP_BLEZ || inst[31:26] == OP_BNE) &&
-			(de_op_type != 2'b01 || de_instr != 6'b1);
+	assign npc = jump ? bpc
+				: pc + 4;
 	
 	always @(posedge clk) begin
+		// s <= sw;
+		// t <= tw;
 		if(rwin == 2'b01) begin
 			gpr[rdin] <= dtowrite;
 		end

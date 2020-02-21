@@ -31,7 +31,7 @@ module fdreg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
-			fd_pc <= 32'hfffffffc;
+			fd_pc <= 32'b0;
 			fd_inst <= 1;
 		end
 		else begin
@@ -40,7 +40,7 @@ module fdreg
 				fd_inst <= f_inst;
 			end
 			else if(update == 2'b10) begin
-				fd_pc <= 32'hfffffffc;
+				fd_pc <= 32'b0;
 				fd_inst <= 1;
 			end
 		end
@@ -68,6 +68,7 @@ module dereg
 	input wire [4:0] d_rd,
 	input wire [4:0] d_wait_time,
 	input wire [31:0] d_pc,
+	input wire [31:0] d_npc,
 
 	output logic [5:0] de_instr,
 	output logic [1:0] de_op_type,
@@ -83,7 +84,8 @@ module dereg
 	output logic de_stop,
 	output logic [4:0] de_rd,
 	output logic [4:0] de_wait_time,
-	output logic [31:0] de_pc
+	output logic [31:0] de_pc,
+	output logic [31:0] de_npc
 );
 
 	always @(posedge clk) begin
@@ -101,8 +103,9 @@ module dereg
 			de_is_jr <= 0;
 			de_stop <= 0;
 			de_rd <= 0;
-			de_pc <= 0;
 			de_wait_time <= 0;
+			de_pc <= 0;
+			de_npc <= 0;
 		end
 		else begin
 			if(update == 2'b01) begin
@@ -119,8 +122,9 @@ module dereg
 				de_is_jr <= d_is_jr;
 				de_stop <= d_stop;
 				de_rd <= d_rd;
-				de_pc <= d_pc;
 				de_wait_time <= d_wait_time;
+				de_pc <= d_pc;
+				de_npc <= d_npc;
 			end
 			else if(update == 2'b10) begin
 				de_instr <= 1;
@@ -136,8 +140,9 @@ module dereg
 				de_is_jr <= 0;
 				de_stop <= 0;
 				de_rd <= 0;
-				de_pc <= 0;
 				de_wait_time <= 0;
+				de_pc <= 0;
+				de_npc <= 0;
 			end
 		end
 	end
@@ -149,10 +154,16 @@ module ewreg
 	input wire rstn,
 	input wire [1:0] update,
 
+	input wire e_is_jr,
+	input wire e_branch,
+	input wire [31:0] e_npc,
 	input wire [31:0] e_d,
 	input wire [1:0] e_rw,
 	input wire [4:0] e_rd,
 
+	output logic ew_is_jr,
+	output logic ew_branch,
+	output logic [31:0] ew_npc,
 	output logic [31:0] ew_d,
 	output logic [1:0] ew_rw,
 	output logic [4:0] ew_rd
@@ -160,17 +171,26 @@ module ewreg
 
 	always @(posedge clk) begin
 		if(~rstn) begin
+			ew_is_jr <= 0;
+			ew_branch <= 0;
+			ew_npc <= 0;
 			ew_d <= 0;
 			ew_rw <= 0;
 			ew_rd <= 0;
 		end
 		else begin
 			if(update == 2'b01) begin
+				ew_is_jr <= e_is_jr;
+				ew_branch <= e_branch;
+				ew_npc <= e_npc;
 				ew_d <= e_d;
 				ew_rw <= e_rw;
 				ew_rd <= e_rd;
 			end
 			else if(update == 2'b10) begin
+				ew_is_jr <= 0;
+				ew_branch <= 0;
+				ew_npc <= 0;
 				ew_d <= 0;
 				ew_rw <= 0;
 				ew_rd <= 0;

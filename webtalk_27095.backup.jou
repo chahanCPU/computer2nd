@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:36:41 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Fri Feb 14 12:49:16 2020
+# Process ID: 27095
+# Current directory: /home/omochan/3A/cpujikken/core2
+# Command line: wbtcv -mode batch -source /home/omochan/3A/cpujikken/loopback/project_2/project_2.hw/webtalk/labtool_webtalk.tcl -notrace
+# Log file: /home/omochan/3A/cpujikken/core2/webtalk.log
+# Journal file: /home/omochan/3A/cpujikken/core2/webtalk.jou
+#-----------------------------------------------------------
+source /home/omochan/3A/cpujikken/loopback/project_2/project_2.hw/webtalk/labtool_webtalk.tcl -notrace

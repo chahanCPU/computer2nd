@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+//reminder, change tx buffer size
 import constant::*;
 
 module execute #( parameter CLK_PER_HALF_BIT = 434)
@@ -23,6 +24,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	input wire is_jr,
 	input wire start,
 	input wire [2:0] mode,
+	input wire hazard,
 	// output logic [31:0] d,
 	output wire [31:0] d,
 	output wire [31:0] npc,
@@ -31,8 +33,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	output logic aa_sent
 );
 
-	wire [31:0] s;
-	wire [31:0] t;
+	logic [31:0] s;
+	logic [31:0] t;
+	wire [31:0] sw;
+	wire [31:0] tw;
 
 	forward _forward(
 		.s(de_s),
@@ -42,8 +46,8 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		.d(ew_d),
 		.rw(ew_rw),
 		.rd(ew_rd),
-		.fs(s),
-		.ft(t));
+		.fs(sw),
+		.ft(tw));
 
 	wire [7:0] 			 rdata;
     wire 			 rx_ready;
@@ -52,7 +56,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	wire [4:0] h;
 
 	wire [31:0] douta;
-	wire [31:0] addra;
+	logic [31:0] addra;
 	wire [31:0] bpc;
 
 	logic uart_state_reg;
@@ -62,25 +66,50 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
-	(* ram_style = "distributed" *) logic [7:0] rxbuffer[(2**RX_SIZE)-1:0];
+
 
 	logic [RX_SIZE-1:0] rxbot;
 	logic [RX_SIZE-1:0] rxtop;
+	logic rxwea;
+	logic [7:0] rxout;
+	logic [31:0] op_in_out;
+	logic [2:0] rxlatancy;
 
+	UART_RX_BRAM _RX(
+		.addra(rxtop),
+		.clka(clk),
+		.dina(rdata),
+		.wea(rxwea),
+		.addrb(rxbot),
+		.clkb(clk),
+		.doutb(rxout)
+	);
 
     uart_rx #(CLK_PER_HALF_BIT) rx(rdata, rx_ready, ferr, rxd, clk, rstn);
-	logic [7:0] op_in_out;
-	// assign op_in_out = rxbuffer[rxbot];
 
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
-	parameter TX_SIZE = 11;
+	parameter TX_SIZE = 14;
 	logic [7:0] odata;
-	(* ram_style = "distributed" *) logic [7:0] txbuffer[(2**TX_SIZE)-1:0];
 
 	logic [TX_SIZE-1:0] txbot;
 	logic [TX_SIZE-1:0] txtop;
+	logic txwea;
+	logic [7:0] txin;
+	logic [7:0] txout;
+	logic [2:0] txlatancy;
+
+
+	UART_TX_BRAM _TX(
+		.addra(txtop),
+		.clka(clk),
+		.dina(txin),
+		.wea(txwea),
+		.addrb(txbot),
+		.clkb(clk),
+		.doutb(txout)
+	);
 
 
 	reg 				 tx_start;
@@ -90,14 +119,22 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	uart_tx #(CLK_PER_HALF_BIT) tx(odata, tx_start, tx_busy, txd, clk, rstn);
 
 
-	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S));
-	assign addra = s + imm;
+	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S) && !start);
+	// assign addra = s + imm;
 	assign h = imm[10:6];
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
+	// assign npc = is_jr ? d
+	// 			: jump ? bpc
+	// 			: (branch && d == 32'b1) ? bpc
+	// 			: pc + 4;
+
 	assign npc = is_jr ? d
 				: jump ? bpc
-				: (branch && d == 32'b1) ? bpc
+				: (op_type == 2'b00 && instr == OP_BEQ && sw == tw) ? bpc
+				: (op_type == 2'b00 && instr == OP_BLEZ && $signed(sw) <= $signed(0)) ? bpc
+				: (op_type == 2'b00 && instr == OP_BGTZ && $signed(sw) > $signed(0)) ? bpc
+				: (op_type == 2'b00 && instr == OP_BNE && sw != tw) ? bpc
 				: pc + 4;
 
 	// BRAM BRAM (
@@ -107,6 +144,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// 	.clka (clk),
 	// 	.douta (douta)
 	// );
+
+	logic [31:0] mul_out;
+	logic [63:0] div_out;
+	logic div_valid;
 
 
 	logic [31:0] fpu_add_out;
@@ -125,15 +166,36 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] fpu_ftoi_out;
 	logic [31:0] fpu_itof_out;
 
-	// fadd faddo (s, t, fpu_add_out, fpu_add_ovf);
-	// fsub fsubo (s, t, fpu_sub_out, fpu_sub_ovf);
-	// fmul fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	// finv finvo (s, clk, rstn, fpu_inv_out);
+	MUL32_32 _MUL(
+		.CLK(clk), 
+		.A(s), 
+		.B(t),
+		.P(mul_out)
+	);
+	
+	DIV32 _DIV(
+		.s_axis_divisor_tdata(t),
+		.s_axis_divisor_tvalid(1'b1),
+		.s_axis_dividend_tdata(s),
+		.s_axis_dividend_tvalid(1'b1),
+		.aclk(clk),
+		.m_axis_dout_tdata(div_out),
+		.m_axis_dout_tvalid(div_valid)
+	);
+
+
+	fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
+	fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
+	fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	finv finvo (s, clk, rstn, fpu_inv_out);
+	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	// finv_old finvo (s, fpu_inv_out);
+	// fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
 	// fneg fnego (s, fpu_neg_out);
-	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
-	// fsqrt fsqrto (s, fpu_sqrt_out);
 	feq feqo (s, t, fpu_eq_out);
 	flt flto (s, t, fpu_lt_out);
 	fle fleo (s, t, fpu_le_out);
@@ -142,25 +204,28 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign d = 
 		op_type == 2'b01 ?
-			instr == FUNC_ADD ? s + t
-			: instr == FUNC_SUB ? s - t
+			instr == FUNC_ADD ? sw + tw
+			: instr == FUNC_SUB ? sw - tw
+			: instr == FUNC_MULT ? mul_out
+			: instr == FUNC_DIV ? div_out[63:32]
 			// : instr == FUNC_MULT ? s * t
 			// : instr == FUNC_DIV ? s / t
-			: instr == FUNC_AND ? s & t
-			: instr == FUNC_OR ? s | t
-			: instr == FUNC_XOR ? s ^ t
-			: instr == FUNC_SLT ? $signed(s) < $signed(t)
-			: instr == FUNC_SLL ? t << h
-			: instr == FUNC_SLLV ? t << s
-			: instr == FUNC_SRL ? t >> h
-			: instr == FUNC_SRLV ? t >> s
+			: instr == FUNC_AND ? sw & tw
+			: instr == FUNC_OR ? sw | tw
+			: instr == FUNC_XOR ? sw ^ tw
+			: instr == FUNC_SLT ? $signed(sw) < $signed(tw)
+			: instr == FUNC_SLL ? tw << h
+			: instr == FUNC_SLLV ? tw << sw
+			: instr == FUNC_SRL ? tw >> h
+			: instr == FUNC_SRLV ? tw >> sw
+			: instr == FUNC_JR ? sw
 			: 32'b0
 		: op_type == 2'b10 ?
 			instr == FPU_ADD ? fpu_add_out
 			: instr == FPU_SUB ? fpu_sub_out
 			: instr == FPU_MUL ? fpu_mul_out
 			: instr == FPU_INV ? fpu_inv_out
-			: instr == FPU_NEG ? s ^ (32'h80000000)
+			: instr == FPU_NEG ? sw ^ (32'h80000000)
 			: instr == FPU_SQRT ? fpu_sqrt_out
 			: instr == FPU_EQ ? fpu_eq_out
 			: instr == FPU_LT ? fpu_lt_out
@@ -169,16 +234,20 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FPU_ITOF ? fpu_itof_out
 			: 32'b0
 		: op_type == 2'b00 ? 
-			instr == OP_ADDI ? s + imm
-			: instr == OP_ANDI ? s & imm
-			: instr == OP_ORI ? s | imm
-			: instr == OP_XORI ? s ^ {16'b0, imm[15:0]}
-			: instr == OP_SLTI ? $signed(s) < $signed(imm)
+			instr == OP_ADDI ? sw + imm
+			: instr == OP_ANDI ? sw & imm
+			: instr == OP_ORI ? sw | imm
+			: instr == OP_XORI ? sw ^ {16'b0, imm[15:0]}
+			: instr == OP_SLTI ? $signed(sw) < $signed(imm)
 			: instr == OP_LUI ? (imm << 16)
 			: instr == OP_LW ? douta
 			: instr == OP_LW_S ? douta
-			: instr == OP_JAL ? s
+			: instr == OP_JAL ? sw
 			: instr == OP_IN ? op_in_out
+			: instr == OP_BEQ ? sw == tw
+			: instr == OP_BGTZ ? $signed(sw) > $signed(0)
+			: instr == OP_BLEZ ? $signed(sw) <= $signed(0)
+			: instr == OP_BNE ? sw != tw
 			: 32'b0
 		: 32'b0;
 
@@ -187,73 +256,120 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			rxbot <= 0;
 			rxtop <= 0;
 			uart_state_reg <= 0;
+			tx_start <= 0;
 
 			txbot <= 0;
 			txtop <= 0;
 			aa_sent <= 0;
 			op_in_out <= 0;
 			odata <= 0;
+
+			rxwea <= 0;
+			rxlatancy <= 0;
+
+			txwea <= 0;
+			txlatancy <= 0;
+			txin <= 0;
+			s <= 0;
+			t <= 0;
+			addra <= 0;
 		end
 		else begin
+
+			//forwarding register
+			s <= sw;
+			t <= tw;
+
+			addra <= sw + imm;
 
 			//UART OPERATION
 			if(mode == 1) begin // for LOAD
 				if(aa_sent == 0) begin
-					if(txtop == 0) begin
-						txbuffer[txtop] <= 8'b10101010;
-						txtop <= 1;
+					if(txlatancy == 0) begin
+						tx_start <= 1;
+						odata <= 8'b10101010;
+						txlatancy <= 1;
 					end
 					else begin
+						tx_start <= 0;
 						if(~tx_busy) begin
 							aa_sent <= 1;
+							txlatancy <= 0;
 						end
 					end
 				end
 			end
 
+			if(rxwea) begin
+				rxwea <= 0;
+			end
+
+			if(txwea) begin
+				txwea <= 0;
+			end
+
 			//for EXEC
 			if(mode == 2 && rx_ready) begin
-				rxbuffer[rxtop] <= {24'b0, rdata};
-				rxtop <= rxtop + 1;
+			rxtop <= rxtop + 1;
+			rxwea <= 1;
 			end
 
 
-			if(tx_start == 1) begin
-				tx_start <= 0;
-			end
-			else begin
-				if (~tx_busy && txtop != txbot) begin
-					tx_start <= 1;
-					odata <= txbuffer[txbot];
-					txbot <= txbot + 1;
+			if(mode != 1) begin
+				if(tx_start == 1) begin
+					tx_start <= 0;
+					txlatancy = 0;
+				end
+				else begin
+					if ((~tx_busy && txtop != txbot) || txlatancy) begin
+						if(txlatancy == 0) begin
+							txbot <= txbot + 1;
+						end
+						if(txlatancy == 3'b11) begin
+							tx_start <= 1;
+							odata <= txout;
+						end
+						if(txlatancy <= 3'b11) begin
+							txlatancy <= txlatancy + 1;
+						end
+					end
 				end
 			end
 
 
 			if(op_type == 2'b00 && instr == OP_IN) begin
 				if(uart_state_reg == 0) begin
-					if(start == 1) begin
+					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
+						rxlatancy <= 3'b0;
 					end
 				end
 				else begin
-					if(rxbot != rxtop) begin
-						op_in_out <= rxbuffer[rxbot];
-						rxbot <= rxbot + 1;
-						uart_state_reg <= 0;
+					if(rxbot != rxtop || rxlatancy) begin
+						if(rxlatancy == 0) begin
+							rxbot <= rxbot + 1;
+						end
+						if(rxlatancy == 3'b11) begin
+							op_in_out <= {24'b0, rxout};
+							uart_state_reg <= 0;
+						end
+						if(rxlatancy <= 3'b11) begin
+							rxlatancy <= rxlatancy + 1;
+						end
 					end
 				end
 			end
 			else if(op_type == 2'b00 && instr == OP_OUT) begin
 				if(uart_state_reg == 0) begin
-					if(start == 1) begin
+					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
 					end
 				end
 				else begin
 					if(txtop + {{(TX_SIZE-1){1'b0}}, 1'b1} != txbot) begin
-						txbuffer[txtop] <= s[7:0];
+						txin <= s[7:0];
 						txtop <= txtop + 1;
+						txwea <= 1;
 						uart_state_reg <= 0;
 					end
 				end
