@@ -36,38 +36,38 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] fd_inst;
 
 
-	logic [5:0] d_instr;
+	logic [3:0] d_instr;
 	logic [1:0] d_op_type;
 	logic [31:0] d_s;
-	logic [5:0] d_rs;
+	logic [6:0] d_rs;
 	logic [31:0] d_t;
-	logic [5:0] d_rt;
+	logic [6:0] d_rt;
 	logic [31:0] d_imm;
 	logic d_branch;
 	logic d_jump;
 	logic [1:0] d_rw;
 	logic d_is_jr;
 	logic d_stop;
-	logic [4:0] d_rd;
+	logic [5:0] d_rd;
 	logic [31:0] d_npc;
 	logic [4:0] d_wait_time;
 	logic [31:0] d_omo;
 
 	logic [1:0] de_update;
 
-	logic [5:0] de_instr;
+	logic [3:0] de_instr;
 	logic [1:0] de_op_type;
 	logic [31:0] de_s;
-	logic [5:0] de_rs;
+	logic [6:0] de_rs;
 	logic [31:0] de_t;
-	logic [5:0] de_rt;
+	logic [6:0] de_rt;
 	logic [31:0] de_imm;
 	logic de_branch;
 	logic de_jump;
 	logic [1:0] de_rw;
 	logic de_is_jr;
 	logic de_stop;
-	logic [4:0] de_rd;
+	logic [5:0] de_rd;
 	logic [4:0] de_wait_time;
 	logic [31:0] de_pc;
 	logic [31:0] de_npc;
@@ -76,15 +76,17 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] e_d;
 	logic [31:0] e_npc;
 	logic e_start;
+	logic e_taken;
 	logic e_uart_state;
 	logic hazard;
 
 
 	logic ew_branch;
 	logic ew_is_jr;
+	logic ew_taken;
 	logic [31:0] ew_npc;
 	logic [31:0] ew_d;
-	logic [4:0] ew_rd;
+	logic [5:0] ew_rd;
 	logic [1:0] ew_rw;
 
 	logic [1:0] ew_update;
@@ -117,7 +119,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.done(load_done)
 	);
 
-	wire npc_stall = d_jump && latancy == 0;
+	wire npc_stall = (d_jump || d_is_jr) && latancy == 0;
 	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
 	assign hazard = (ew_branch || ew_is_jr) && ew_npc != de_pc;
@@ -144,6 +146,9 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.clk(clk), 
 		.rstn(rstn), 
 		.pc(fd_pc), 
+		.ew_taken(ew_taken),
+		.ew_branch(ew_branch),
+		.start(e_start),
 		.inst(fd_inst), 
 		.rwin(ew_rw), 
 		.dtowrite(ew_d), 
@@ -240,6 +245,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.start(e_start), 
 		.d(e_d), 
 		.npc(e_npc),
+		.taken(e_taken),
 		.uart_state(e_uart_state),
 		.aa_recieved(aa_recieved),
 		.aa_sent(aa_sent)
@@ -259,6 +265,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.update(ew_update),
 		.e_is_jr(de_is_jr),
 		.e_branch(de_branch),
+		.e_taken(e_taken),
 		.e_npc(e_npc),
 		.e_d(e_d),
 		.e_rw(de_rw),
@@ -266,6 +273,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 
 		.ew_is_jr(ew_is_jr),
 		.ew_branch(ew_branch),
+		.ew_taken(ew_taken),
 		.ew_npc(ew_npc),
 		.ew_d(ew_d),
 		.ew_rw(ew_rw),

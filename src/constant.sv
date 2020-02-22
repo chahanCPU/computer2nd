@@ -1,6 +1,7 @@
 package constant;
 	parameter INST_SIZE = 15;
 	parameter BRAM_SIZE = 19;
+	parameter TX_SIZE = 14;
 	parameter OP_SPECIAL = 4'b0000;
 	parameter OP_FPU = 4'b1000;
 	parameter OP_ADDI = 4'b0001;

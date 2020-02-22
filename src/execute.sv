@@ -9,15 +9,15 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	input wire rxd,
 	input wire txd,
 	input wire [31:0] pc,
-	input wire [5:0] instr,
+	input wire [3:0] instr,
 	input wire [1:0] op_type,
 	input wire [31:0] de_s,
-	input wire [5:0] de_rs,
+	input wire [6:0] de_rs,
 	input wire [31:0] de_t,
-	input wire [5:0] de_rt,
+	input wire [6:0] de_rt,
 	input wire [31:0] ew_d,
 	input wire [1:0] ew_rw,
-	input wire [4:0] ew_rd,
+	input wire [5:0] ew_rd,
 	input wire [31:0] imm,
 	input wire branch,
 	input wire jump,
@@ -28,6 +28,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// output logic [31:0] d,
 	output wire [31:0] d,
 	output wire [31:0] npc,
+	output wire taken,
 	output logic uart_state, //if on, busy
 	output wire aa_recieved,
 	output logic aa_sent
@@ -62,7 +63,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic uart_state_reg;
 
 	assign uart_state = 
-		(start && op_type == 2'b00 && (instr == OP_OUT || instr == OP_IN)) 
+		(start && op_type == 2'b01 && (instr == FUNC_OUT || instr == FUNC_IN || instr == FUNC_OUTINT)) 
 		|| uart_state_reg;
 
 	localparam RX_SIZE = 11;
@@ -90,7 +91,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign aa_recieved = rx_ready && rdata == 8'b10101010;
 
-	parameter TX_SIZE = 14;
 	logic [7:0] odata;
 
 	logic [TX_SIZE-1:0] txbot;
@@ -121,7 +121,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	assign wea = (op_type == 2'b0 && (instr == OP_SW || instr == OP_SW_S) && !start);
 	// assign addra = s + imm;
-	assign h = imm[10:6];
+	assign h = imm[9:5];
 
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
 	// assign npc = is_jr ? d
@@ -129,12 +129,24 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// 			: (branch && d == 32'b1) ? bpc
 	// 			: pc + 4;
 
+	logic [7:0] outint_s;
+	logic [23:0] outint_reg;
+	logic [3:0] outint_state;
+	logic outint_lz;
+
+	logic [31:0] fpu_eq_out;
+	logic [31:0] fpu_lt_out;
+	logic [31:0] fpu_le_out;
+
+	assign taken = 
+		(op_type == 2'b00 && instr == OP_BEQ && sw == tw) ||
+		(op_type == 2'b00 && instr == OP_BLE && $signed(sw) <= $signed(tw)) ||
+		(op_type == 2'b00 && instr == OP_BEQ_S && fpu_eq_out) ||
+		(op_type == 2'b00 && instr == OP_BLE_S && fpu_le_out);
+
 	assign npc = is_jr ? d
 				: jump ? bpc
-				: (op_type == 2'b00 && instr == OP_BEQ && sw == tw) ? bpc
-				: (op_type == 2'b00 && instr == OP_BLEZ && $signed(sw) <= $signed(0)) ? bpc
-				: (op_type == 2'b00 && instr == OP_BGTZ && $signed(sw) > $signed(0)) ? bpc
-				: (op_type == 2'b00 && instr == OP_BNE && sw != tw) ? bpc
+				: taken ? bpc
 				: pc + 4;
 
 	BRAM BRAM (
@@ -160,9 +172,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// logic [31:0] fpu_abs_out;
 	// logic [31:0] fpu_neg_out;
 	logic [31:0] fpu_sqrt_out;
-	logic [31:0] fpu_eq_out;
-	logic [31:0] fpu_lt_out;
-	logic [31:0] fpu_le_out;
 	logic [31:0] fpu_ftoi_out;
 	logic [31:0] fpu_itof_out;
 
@@ -191,7 +200,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
 	fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
 	finv_old finvo (s, fpu_inv_out);
-	fsqrt_old fsqrto (s, clk, rstn, fpu_sqrt_out);
+	fsqrt_old fsqrto (s, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -210,14 +219,10 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FUNC_DIV ? div_out[63:32]
 			// : instr == FUNC_MULT ? s * t
 			// : instr == FUNC_DIV ? s / t
-			: instr == FUNC_AND ? sw & tw
-			: instr == FUNC_OR ? sw | tw
-			: instr == FUNC_XOR ? sw ^ tw
-			: instr == FUNC_SLT ? $signed(sw) < $signed(tw)
 			: instr == FUNC_SLL ? tw << h
-			: instr == FUNC_SLLV ? tw << sw
-			: instr == FUNC_SRL ? tw >> h
-			: instr == FUNC_SRLV ? tw >> sw
+			: instr == FUNC_SRA ? tw >> h
+			: instr == FUNC_MV ? sw
+			: instr == FUNC_IN ? op_in_out
 			: instr == FUNC_JR ? sw
 			: 32'b0
 		: op_type == 2'b10 ?
@@ -226,28 +231,20 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FPU_MUL ? fpu_mul_out
 			: instr == FPU_INV ? fpu_inv_out
 			: instr == FPU_NEG ? sw ^ (32'h80000000)
+			: instr == FPU_ABS ? sw & (32'h7fffffff)
 			: instr == FPU_SQRT ? fpu_sqrt_out
-			: instr == FPU_EQ ? fpu_eq_out
-			: instr == FPU_LT ? fpu_lt_out
-			: instr == FPU_LE ? fpu_le_out
 			: instr == FPU_FTOI ? fpu_ftoi_out
 			: instr == FPU_ITOF ? fpu_itof_out
+			: instr == FPU_MV_S ? sw
 			: 32'b0
 		: op_type == 2'b00 ? 
 			instr == OP_ADDI ? sw + imm
-			: instr == OP_ANDI ? sw & imm
-			: instr == OP_ORI ? sw | imm
-			: instr == OP_XORI ? sw ^ {16'b0, imm[15:0]}
-			: instr == OP_SLTI ? $signed(sw) < $signed(imm)
-			: instr == OP_LUI ? (imm << 16)
 			: instr == OP_LW ? douta
-			: instr == OP_LW_S ? douta
+			: instr == OP_LUI ? (imm << 16)
+			: instr == OP_LI ? (de_rs[5] ? (tw | imm) : imm)
 			: instr == OP_JAL ? sw
-			: instr == OP_IN ? op_in_out
-			: instr == OP_BEQ ? sw == tw
-			: instr == OP_BGTZ ? $signed(sw) > $signed(0)
-			: instr == OP_BLEZ ? $signed(sw) <= $signed(0)
-			: instr == OP_BNE ? sw != tw
+			: instr == OP_LA ? imm << 2
+			: instr == OP_LW_S ? douta
 			: 32'b0
 		: 32'b0;
 
@@ -273,12 +270,17 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			s <= 0;
 			t <= 0;
 			addra <= 0;
+			outint_s <= 0;
+			outint_reg <= 0;
+			outint_state <= 0;
+			outint_lz <= 0;
 		end
 		else begin
 
 			//forwarding register
 			s <= sw;
 			t <= tw;
+
 
 			addra <= sw + imm;
 
@@ -337,7 +339,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			end
 
 
-			if(op_type == 2'b00 && instr == OP_IN) begin
+			if(op_type == 2'b01 && instr == FUNC_IN) begin
 				if(uart_state_reg == 0) begin
 					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
@@ -359,7 +361,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 					end
 				end
 			end
-			else if(op_type == 2'b00 && instr == OP_OUT) begin
+			else if(op_type == 2'b01 && instr == FUNC_OUT) begin
 				if(uart_state_reg == 0) begin
 					if(start == 1 && !hazard) begin
 						uart_state_reg <= 1;
@@ -371,6 +373,103 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 						txtop <= txtop + 1;
 						txwea <= 1;
 						uart_state_reg <= 0;
+					end
+				end
+			end
+			else if(op_type == 2'b01 && instr == FUNC_OUTINT) begin
+				if(uart_state_reg == 0) begin
+					if(start == 1 && !hazard) begin
+						uart_state_reg <= 1;
+						outint_state <= 0;
+					end
+				end
+				else begin
+					if(outint_state == 0) begin
+						outint_s <= s[7:0];
+						outint_reg <= 0;
+						outint_lz <= 0;
+						outint_state <= 1;
+					end
+					else if(outint_state == 1) begin
+						if(8'd100 <= outint_s && outint_s < 8'd200) begin
+							outint_reg <= 24'h31;
+							outint_s <= outint_s - 8'd100;
+							outint_lz <= 1;
+						end
+						else if(8'd200 <= outint_s) begin
+							outint_reg <= 24'h32;
+							outint_s <= outint_s - 8'd200;
+							outint_lz <= 1;
+						end
+						outint_state <= 2;
+					end
+					else if(outint_state == 2) begin
+						if(outint_s < 8'd10 && outint_lz) begin
+							outint_reg <= (outint_reg << 8) | 24'h30;
+						end
+						else if(8'd10 <= outint_s && outint_s < 8'd20) begin
+							outint_reg <= (outint_reg << 8) | 24'h31;
+							outint_s <= outint_s - 8'd10;
+						end
+						else if(8'd20 <= outint_s && outint_s < 8'd30) begin
+							outint_reg <= (outint_reg << 8) | 24'h32;
+							outint_s <= outint_s - 8'd20;
+						end
+						else if(8'd30 <= outint_s && outint_s < 8'd40) begin
+							outint_reg <= (outint_reg << 8) | 24'h33;
+							outint_s <= outint_s - 8'd30;
+						end
+						else if(8'd40 <= outint_s && outint_s < 8'd50) begin
+							outint_reg <= (outint_reg << 8) | 24'h34;
+							outint_s <= outint_s - 8'd40;
+						end
+						else if(8'd50 <= outint_s && outint_s < 8'd60) begin
+							outint_reg <= (outint_reg << 8) | 24'h35;
+							outint_s <= outint_s - 8'd50;
+						end
+						else if(8'd60 <= outint_s && outint_s < 8'd70) begin
+							outint_reg <= (outint_reg << 8) | 24'h36;
+							outint_s <= outint_s - 8'd60;
+						end
+						else if(8'd70 <= outint_s && outint_s < 8'd80) begin
+							outint_reg <= (outint_reg << 8) | 24'h37;
+							outint_s <= outint_s - 8'd70;
+						end
+						else if(8'd80 <= outint_s && outint_s < 8'd90) begin
+							outint_reg <= (outint_reg << 8) | 24'h38;
+							outint_s <= outint_s - 8'd80;
+						end
+						else if(8'd90 <= outint_s) begin
+							outint_reg <= (outint_reg << 8) | 24'h39;
+							outint_s <= outint_s - 8'd90;
+						end
+						outint_state <= 3;
+					end
+					else if(outint_state == 3) begin
+						outint_reg <= (outint_reg << 8) | {16'd0, outint_s} | 24'h30;
+						outint_state <= 4;
+					end
+					else if(outint_state >= 4) begin
+						if(!outint_state[0]) begin
+							if(outint_reg[23:16] == 8'd0) begin
+								outint_state <= outint_state + 1;
+								outint_reg <= outint_reg << 8;
+							end
+							else if(txtop + {{(TX_SIZE-1){1'b0}}, 1'b1} != txbot) begin
+								txin <= outint_reg[23:16];
+								outint_reg <= outint_reg << 8;
+								txtop <= txtop + 1;
+								txwea <= 1;
+								outint_state <= outint_state + 1;
+								if(outint_state == 8) begin
+									uart_state_reg <= 0;
+								end
+							end
+						end
+						else begin
+							//txwea <= 0;
+							outint_state <= outint_state + 1;
+						end
 					end
 				end
 			end
