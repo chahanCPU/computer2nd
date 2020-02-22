@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-//reminder, change tx buffer size
 import constant::*;
 
 module execute #( parameter CLK_PER_HALF_BIT = 434)
@@ -57,7 +56,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	wire [4:0] h;
 
 	wire [31:0] douta;
-	logic [31:0] addra;
 	wire [31:0] bpc;
 
 	logic uart_state_reg;
@@ -144,13 +142,17 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 		(op_type == 2'b00 && instr == OP_BEQ_S && fpu_eq_out) ||
 		(op_type == 2'b00 && instr == OP_BLE_S && fpu_le_out);
 
-	assign npc = is_jr ? d
+	assign npc = is_jr ? sw
 				: jump ? bpc
 				: taken ? bpc
 				: pc + 4;
 
+	logic [BRAM_SIZE-1:0] addra_reg;
+	logic [31:0] addra;
+	assign addra = sw + imm;
+
 	BRAM BRAM (
-		.addra (addra[BRAM_SIZE+1:2]),
+		.addra (addra_reg),
 		.dina (t),
 		.wea (wea),
 		.clka (clk),
@@ -195,12 +197,12 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 
 	fadd faddo (s, t, clk, rstn, fpu_add_out, fpu_add_ovf);
 	fsub fsubo (s, t, clk, rstn, fpu_sub_out, fpu_sub_ovf);
-	// fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
-	// finv finvo (s, clk, rstn, fpu_inv_out);
-	// fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
-	fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
-	finv_old finvo (s, fpu_inv_out);
-	fsqrt_old fsqrto (s, fpu_sqrt_out);
+	fmul fmulo (s, t, clk, rstn, fpu_mul_out, fpu_mul_ovf);
+	finv finvo (s, clk, rstn, fpu_inv_out);
+	fsqrt fsqrto (s, clk, rstn, fpu_sqrt_out);
+	// fmul_old fmulo (s, t, fpu_mul_out, fpu_mul_ovf);
+	// finv_old finvo (s, fpu_inv_out);
+	// fsqrt_old fsqrto (s, fpu_sqrt_out);
 	// fsqrt fsqrto (s, fpu_sqrt_out);
 	// finv finvo (s, fpu_inv_out);
 	// fabs fabso (s, fpu_abs_out);
@@ -223,7 +225,6 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			: instr == FUNC_SRA ? tw >> h
 			: instr == FUNC_MV ? sw
 			: instr == FUNC_IN ? op_in_out
-			: instr == FUNC_JR ? sw
 			: 32'b0
 		: op_type == 2'b10 ?
 			instr == FPU_ADD ? fpu_add_out
@@ -269,7 +270,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			txin <= 0;
 			s <= 0;
 			t <= 0;
-			addra <= 0;
+			addra_reg <= 0;
 			outint_s <= 0;
 			outint_reg <= 0;
 			outint_state <= 0;
@@ -282,7 +283,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 			t <= tw;
 
 
-			addra <= sw + imm;
+			addra_reg <= addra[BRAM_SIZE+1:2];
 
 			//UART OPERATION
 			if(mode == 1) begin // for LOAD

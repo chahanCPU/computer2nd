@@ -160,7 +160,7 @@ module decode
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
 	assign npc = jump ? bpc
 				// : (branch && pred[1]) ? bpc
-				: is_jr ? s
+				: is_jr ? tmp_s
 				: pc + 4;
 	
 	always @(posedge clk) begin
