@@ -2,20 +2,20 @@
 
 module forward
 	(input wire [31:0] s,
-	input wire [5:0] rs,
+	input wire [6:0] rs,
 	input wire [31:0] t,
-	input wire [5:0] rt,
+	input wire [6:0] rt,
 	input wire [31:0] d,
 	input wire [1:0] rw,
-	input wire [4:0] rd,
+	input wire [5:0] rd,
 	output wire [31:0] fs,
 	output wire [31:0] ft
 );
 
 	assign fs =
-		(rw != 2'b0 && rw[1] == rs[5] && rd[4:0] == rs[4:0]) ? d : s;
+		(rw != 2'b0 && rw[1] == rs[6] && rd[5:0] == rs[5:0]) ? d : s;
 	assign ft = 
-		(rw != 2'b0 && rw[1] == rt[5] && rd[4:0] == rt[4:0]) ? d : t;
+		(rw != 2'b0 && rw[1] == rt[6] && rd[5:0] == rt[5:0]) ? d : t;
 
 endmodule
 

@@ -9,22 +9,22 @@ module decode
 	input wire [31:0] inst,
 	input wire [1:0] rwin,
 	input wire [31:0] dtowrite,
-	input wire [4:0] rdin,
+	input wire [5:0] rdin,
 	output wire [5:0] instr,
 	input wire [5:0] de_instr,
 	output wire [1:0] op_type,
 	input wire [1:0] de_op_type,
 	output wire [31:0] s,
-	output wire [5:0] rs,
+	output wire [6:0] rs,
 	output wire [31:0] t,
-	output wire [5:0] rt,
+	output wire [6:0] rt,
 	output wire [31:0] imm,
 	output wire branch,
 	output wire jump,
 	output wire [1:0] rw,
 	output wire is_jr,
 	output wire stop,
-	output wire [4:0] rd,
+	output wire [5:0] rd,
 	output wire [31:0] npc,
 	output wire [4:0] wait_time,
 	output wire [31:0] omo
@@ -53,8 +53,8 @@ module decode
 	logic do_nothing;
 	assign do_nothing = op_type == 2'b01 && inst[5:0] == 6'b1;
 
-	(* ram_style = "distributed" *) reg [31:0][31:0] gpr = {32'b0, 32'b0, 32'h30, 32'hf4240, {28{32'b0}}};
-	(* ram_style = "distributed" *) reg [31:0][31:0] fpr = {32{32'b0}};
+	(* ram_style = "distributed" *) reg [63:0][31:0] gpr = {32'b0, 32'h30, 32'hf4240, {61{32'b0}}};
+	(* ram_style = "distributed" *) reg [63:0][31:0] fpr = {64{32'b0}};
 
 	assign omo = gpr[29];
 
@@ -70,7 +70,7 @@ module decode
 			? (inst[5:0] == FPU_ITOF ? gpr[inst[15:11]] : fpr[inst[15:11]])
 			: gpr[inst[25:21]];
 	
-	assign rs = (inst[31:26] == OP_JAL) ? 6'b0 : inst[31:26] == OP_FPU
+	assign rs = (inst[31:26] == OP_JAL) ? 7'b0 : inst[31:26] == OP_FPU
 		? (inst[5:0] == FPU_ITOF ? {1'b0, inst[15:11]} : {1'b1, inst[15:11]})
 		: {1'b0, inst[25:21]};
 
