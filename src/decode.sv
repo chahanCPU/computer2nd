@@ -143,7 +143,7 @@ module decode
 		  (inst[31:28] == OP_LW || inst[31:28] == OP_LW_S) ? 5'b00011
 		: (inst[31:28] == OP_SW || inst[31:28] == OP_SW_S) ? 5'b00001
 		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_ADD)  ? 5'b00100
-		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_MUL)  ? 5'b00110
+		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_MUL)  ? 5'b00101
 		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_SUB)  ? 5'b00100
 		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_INV)  ? 5'b11111
 		: (inst[31:28] == OP_FPU && inst[3:0] == FPU_SQRT)  ? 5'b11111
@@ -160,7 +160,7 @@ module decode
 	assign bpc = ((pc & 32'hf0000000) | (imm << 2));
 	assign npc = jump ? bpc
 				// : (branch && pred[1]) ? bpc
-				: is_jr ? tmp_s
+				: is_jr ? gpr[inst[27:22]]
 				: pc + 4;
 	
 	always @(posedge clk) begin

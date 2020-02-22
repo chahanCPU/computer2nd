@@ -101,6 +101,8 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	logic [2:0] stage;
 	logic load_done;
 
+	logic [31:0] stall_counter;
+
 
 	wire [7:0] 			 rdata;
 	wire 			 rx_ready;
@@ -119,7 +121,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.done(load_done)
 	);
 
-	wire npc_stall = (d_jump || d_is_jr) && latancy == 0;
+	wire npc_stall = (d_jump) && latancy == 0;
 	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
 	assign hazard = (ew_branch || ew_is_jr) && ew_npc != de_pc;
@@ -287,12 +289,17 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		 stage <= 0;
 		 e_start <= 0;
 		 pc <= 0;
+		 stall_counter <= 0;
 	end 
 	else begin
 		if (mode == STALL) begin
-			if (aa_recieved) begin
+			// if (aa_recieved) begin
+			// 	mode <= LOAD;
+			// end
+			if(stall_counter >= 32'd10000) begin
 				mode <= LOAD;
 			end
+			stall_counter <= stall_counter + 1;
 		end
 		else if (mode == LOAD) begin
 			if(load_done && aa_sent) begin
