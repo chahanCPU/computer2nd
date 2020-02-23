@@ -121,7 +121,7 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 		.done(load_done)
 	);
 
-	wire npc_stall = (d_jump) && latancy == 0;
+	wire npc_stall = (d_jump || d_is_jr) && latancy == 0;
 	wire execute_done = latancy >= de_wait_time && e_uart_state == 0 && (~npc_stall);
 
 	assign hazard = (ew_branch || ew_is_jr) && ew_npc != de_pc;
