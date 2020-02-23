@@ -36,6 +36,7 @@ module execute #( parameter CLK_PER_HALF_BIT = 434)
 	logic [31:0] s;
 	logic [31:0] t;
 	wire [31:0] sw;
+
 	wire [31:0] tw;
 
 	forward _forward(
