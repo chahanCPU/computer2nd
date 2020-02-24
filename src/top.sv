@@ -293,13 +293,13 @@ module top #( parameter CLK_PER_HALF_BIT = 434)
 	end 
 	else begin
 		if (mode == STALL) begin
-			// if (aa_recieved) begin
-			// 	mode <= LOAD;
-			// end
-			if(stall_counter >= 32'd10000) begin
+			if (aa_recieved) begin
 				mode <= LOAD;
 			end
-			stall_counter <= stall_counter + 1;
+			// if(stall_counter >= 32'd10000) begin
+			// 	mode <= LOAD;
+			// end
+			// stall_counter <= stall_counter + 1;
 		end
 		else if (mode == LOAD) begin
 			if(load_done && aa_sent) begin

@@ -16,7 +16,8 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 
 
 
-	reg [31:0] inst_mem[(2 ** INST_SIZE - 1) : 0];
+	(* ram_style = "distributed" *) reg [31:0] inst_mem[(2 ** INST_SIZE - 1) : 0];
+	// reg [31:0] inst_mem[(2 ** INST_SIZE - 1) : 0];
 
 
 	assign inst = inst_mem[pc[INST_SIZE+1:2]];
@@ -49,7 +50,7 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 			// inst <= 0;
 		end
 		else begin
-			if(mode == STALL) begin
+			if(mode == LOAD) begin
 				if(~done) begin
 					if(addra == {INST_SIZE{1'b1}}) begin
 						done <= 1;
