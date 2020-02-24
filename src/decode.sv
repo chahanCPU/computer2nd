@@ -96,8 +96,8 @@ module decode
 		(inst[31:28] == OP_BEQ_S || inst[31:28] == OP_BLE_S) ? {1'b1, inst[21:16]} :
 		{1'b0, inst[21:16]};
 
-	assign imm = inst[31:28] == OP_J ? {6'b0, inst[15:0]}
-				: inst[31:28] == OP_JAL ? {6'b0, inst[15:0]}
+	assign imm = inst[31:28] == OP_J ? {16'b0, inst[15:0]}
+				: inst[31:28] == OP_JAL ? {16'b0, inst[15:0]}
 				: inst[31:28] == OP_LUI ? {16'b0, inst[15:0]}
 				: (inst[31:28] == OP_LI && inst[27]) ? {16'b0, inst[15:0]}
 				: inst[31:28] == OP_LA ? {16'b0, inst[15:0]}

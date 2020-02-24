@@ -49,7 +49,7 @@ module fetch #( parameter CLK_PER_HALF_BIT = 434)
 			// inst <= 0;
 		end
 		else begin
-			if(mode == LOAD) begin
+			if(mode == STALL) begin
 				if(~done) begin
 					if(addra == {INST_SIZE{1'b1}}) begin
 						done <= 1;
