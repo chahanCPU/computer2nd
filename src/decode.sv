@@ -57,7 +57,7 @@ module decode
 	logic do_nothing;
 	assign do_nothing = op_type == 2'b01 && inst[3:0] == FUNC_NOTHING;
 
-	(* ram_style = "distributed" *) reg [63:0][31:0] gpr = {32'b0, 32'h30, 32'hf4240, {61{32'b0}}};
+	(* ram_style = "distributed" *) reg [63:0][31:0] gpr = {32'b0, 32'hf4240, 32'h20, {61{32'b0}}};
 	(* ram_style = "distributed" *) reg [63:0][31:0] fpr = {64{32'b0}};
 
 	assign omo = gpr[29];
